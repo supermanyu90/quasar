@@ -1,0 +1,17 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "outputDirectory": "public",
+  "functions": {
+    "api/*.py": {
+      "includeFiles": "src/**",
+      "maxDuration": 60,
+      "memory": 512
+    }
+  },
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [{ "key": "cache-control", "value": "no-store" }]
+    }
+  ]
+}

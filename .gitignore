@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Virtualenvs — the app is stdlib-only; the venv is only for the optional
+# `anthropic` SDK and must never be committed.
+.venv/
+venv/
+env/
+
+# Vercel
+.vercel/
+
+# OS / editor
+.DS_Store
+*.swp
+.idea/
+.vscode/

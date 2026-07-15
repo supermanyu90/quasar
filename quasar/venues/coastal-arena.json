@@ -1,0 +1,111 @@
+{
+  "schema": "quasar.venue_spec.v1",
+  "id": "coastal-arena",
+  "name": "Coastal Arena",
+  "city": "Chennai",
+  "capacity": 12000,
+  "languages": ["ta", "en", "hi"],
+  "service_rate_per_s": 0.6,
+  "zones": {
+    "NORTH": { "en": "North Stand", "ta": "வடக்கு மாடம்", "hi": "उत्तर स्टैंड" },
+    "EAST": { "en": "East Stand", "ta": "கிழக்கு மாடம்", "hi": "पूर्व स्टैंड" },
+    "SOUTH": { "en": "South Stand", "ta": "தெற்கு மாடம்", "hi": "दक्षिण स्टैंड" },
+    "WEST": { "en": "West Stand", "ta": "மேற்கு மாடம்", "hi": "पश्चिम स्टैंड" },
+    "GATE": { "en": "the entry gates", "ta": "நுழைவு வாயில்கள்", "hi": "प्रवेश द्वार" }
+  },
+  "nodes": [
+    { "id": "G1", "name": "Gate 1 (North)", "x": 0, "y": 78, "level": 1, "zone": "GATE", "tags": ["gate"] },
+    { "id": "G2", "name": "Gate 2 (East)", "x": 82, "y": 0, "level": 1, "zone": "GATE", "tags": ["gate"] },
+    { "id": "G3", "name": "Gate 3 (South)", "x": 0, "y": -78, "level": 1, "zone": "GATE", "tags": ["gate"] },
+    { "id": "G4", "name": "Gate 4 (West)", "x": -82, "y": 0, "level": 1, "zone": "GATE", "tags": ["gate"] },
+
+    { "id": "C-N", "name": "North Concourse", "x": 0, "y": 50, "level": 1, "zone": "NORTH", "tags": ["concourse"] },
+    { "id": "C-NE", "name": "North-East Concourse", "x": 45, "y": 35, "level": 1, "zone": "EAST", "tags": ["concourse"] },
+    { "id": "C-E", "name": "East Concourse", "x": 56, "y": 0, "level": 1, "zone": "EAST", "tags": ["concourse"] },
+    { "id": "C-SE", "name": "South-East Concourse", "x": 45, "y": -35, "level": 1, "zone": "EAST", "tags": ["concourse"] },
+    { "id": "C-S", "name": "South Concourse", "x": 0, "y": -50, "level": 1, "zone": "SOUTH", "tags": ["concourse"] },
+    { "id": "C-SW", "name": "South-West Concourse", "x": -45, "y": -35, "level": 1, "zone": "WEST", "tags": ["concourse"] },
+    { "id": "C-W", "name": "West Concourse", "x": -56, "y": 0, "level": 1, "zone": "WEST", "tags": ["concourse"] },
+    { "id": "C-NW", "name": "North-West Concourse", "x": -45, "y": 35, "level": 1, "zone": "WEST", "tags": ["concourse"] },
+
+    { "id": "SEAT-N", "name": "North Bowl", "x": 0, "y": 30, "level": 2, "zone": "NORTH", "tags": ["seating"] },
+    { "id": "SEAT-E", "name": "East Bowl", "x": 32, "y": 0, "level": 2, "zone": "EAST", "tags": ["seating"] },
+    { "id": "SEAT-S", "name": "South Bowl", "x": 0, "y": -30, "level": 2, "zone": "SOUTH", "tags": ["seating"] },
+    { "id": "SEAT-W", "name": "West Bowl", "x": -32, "y": 0, "level": 2, "zone": "WEST", "tags": ["seating"] },
+
+    { "id": "WC-N-ACC", "name": "North Accessible Washroom", "x": -20, "y": 48, "level": 1, "zone": "NORTH", "tags": ["washroom", "accessible"] },
+    { "id": "WC-S-ACC", "name": "South Accessible Washroom", "x": 20, "y": -48, "level": 1, "zone": "SOUTH", "tags": ["washroom", "accessible"] },
+    { "id": "FNB-N", "name": "North Kiosks", "x": 20, "y": 48, "level": 1, "zone": "NORTH", "tags": ["fnb"] },
+    { "id": "LOST", "name": "Lost & Found", "x": -20, "y": -48, "level": 1, "zone": "SOUTH", "tags": ["lost_and_found"] },
+    { "id": "MED-1", "name": "Medical Post (East)", "x": 62, "y": 22, "level": 1, "zone": "EAST", "tags": ["medical"] },
+    { "id": "MED-2", "name": "Medical Post (West)", "x": -62, "y": -22, "level": 1, "zone": "WEST", "tags": ["medical"] },
+    { "id": "CONTROL", "name": "Command Centre", "x": -62, "y": 22, "level": 1, "zone": "WEST", "tags": ["control"] },
+
+    { "id": "SVC-E", "name": "Service Corridor East", "x": 52, "y": 20, "level": 0, "zone": "EAST", "tags": ["service"] }
+  ],
+  "edges": [
+    { "id": "E-G1", "u": "G1", "v": "C-N", "length_m": 30, "width_m": 8, "kind": "vomitory", "step_free": true },
+    { "id": "E-G2", "u": "G2", "v": "C-E", "length_m": 28, "width_m": 5, "kind": "vomitory", "step_free": true },
+    { "id": "E-G3", "u": "G3", "v": "C-S", "length_m": 30, "width_m": 8, "kind": "vomitory", "step_free": true },
+    { "id": "E-G4", "u": "G4", "v": "C-W", "length_m": 28, "width_m": 6, "kind": "vomitory", "step_free": true },
+
+    { "id": "R-N1", "u": "C-NW", "v": "C-N", "length_m": 48, "width_m": 7, "kind": "concourse", "step_free": true, "label": "North-West" },
+    { "id": "R-N2", "u": "C-N", "v": "C-NE", "length_m": 48, "width_m": 7, "kind": "concourse", "step_free": true, "label": "North-East" },
+    { "id": "R-E1", "u": "C-NE", "v": "C-E", "length_m": 38, "width_m": 3.5, "kind": "corridor", "step_free": true, "label": "East Upper" },
+    { "id": "R-E2", "u": "C-E", "v": "C-SE", "length_m": 38, "width_m": 3.5, "kind": "corridor", "step_free": true, "label": "East Lower" },
+    { "id": "R-S2", "u": "C-SE", "v": "C-S", "length_m": 48, "width_m": 7, "kind": "concourse", "step_free": true, "label": "South-East" },
+    { "id": "R-S1", "u": "C-S", "v": "C-SW", "length_m": 48, "width_m": 7, "kind": "concourse", "step_free": true, "label": "South-West" },
+    { "id": "R-W2", "u": "C-SW", "v": "C-W", "length_m": 38, "width_m": 6, "kind": "corridor", "step_free": true, "label": "West Lower" },
+    { "id": "R-W1", "u": "C-W", "v": "C-NW", "length_m": 38, "width_m": 6, "kind": "corridor", "step_free": true, "label": "West Upper" },
+
+    { "id": "STAIR-N", "u": "C-N", "v": "SEAT-N", "length_m": 22, "width_m": 5, "kind": "stair", "step_free": false },
+    { "id": "RAMP-N", "u": "C-NW", "v": "SEAT-N", "length_m": 44, "width_m": 3, "kind": "ramp", "step_free": true },
+    { "id": "STAIR-E", "u": "C-E", "v": "SEAT-E", "length_m": 24, "width_m": 5, "kind": "stair", "step_free": false },
+    { "id": "RAMP-E", "u": "C-SE", "v": "SEAT-E", "length_m": 46, "width_m": 3, "kind": "ramp", "step_free": true },
+    { "id": "STAIR-S", "u": "C-S", "v": "SEAT-S", "length_m": 22, "width_m": 5, "kind": "stair", "step_free": false },
+    { "id": "RAMP-S", "u": "C-SW", "v": "SEAT-S", "length_m": 44, "width_m": 3, "kind": "ramp", "step_free": true },
+    { "id": "STAIR-W", "u": "C-W", "v": "SEAT-W", "length_m": 24, "width_m": 5, "kind": "stair", "step_free": false },
+    { "id": "RAMP-W", "u": "C-NW", "v": "SEAT-W", "length_m": 46, "width_m": 3, "kind": "ramp", "step_free": true },
+
+    { "id": "SP-WCNA", "u": "C-NW", "v": "WC-N-ACC", "length_m": 14, "width_m": 3, "kind": "corridor", "step_free": true },
+    { "id": "SP-WCSA", "u": "C-SE", "v": "WC-S-ACC", "length_m": 14, "width_m": 3, "kind": "corridor", "step_free": true },
+    { "id": "SP-FNB", "u": "C-N", "v": "FNB-N", "length_m": 14, "width_m": 4, "kind": "corridor", "step_free": true },
+    { "id": "SP-LOST", "u": "C-SW", "v": "LOST", "length_m": 14, "width_m": 3, "kind": "corridor", "step_free": true },
+    { "id": "SP-MED1", "u": "C-E", "v": "MED-1", "length_m": 24, "width_m": 3, "kind": "corridor", "step_free": true },
+    { "id": "SP-MED2", "u": "C-W", "v": "MED-2", "length_m": 24, "width_m": 3, "kind": "corridor", "step_free": true },
+    { "id": "SP-CTRL", "u": "C-W", "v": "CONTROL", "length_m": 16, "width_m": 3, "kind": "corridor", "step_free": true },
+
+    { "id": "SVC-1", "u": "MED-1", "v": "SVC-E", "length_m": 34, "width_m": 3, "kind": "service", "step_free": true, "staff_only": true },
+    { "id": "SVC-2", "u": "SVC-E", "v": "C-NE", "length_m": 30, "width_m": 3, "kind": "service", "step_free": true, "staff_only": true }
+  ],
+  "beacons": ["C-N", "C-NE", "C-E", "C-SE", "C-S", "C-SW", "C-W", "C-NW", "G1", "G2", "G3", "MED-1"],
+  "scenario": {
+    "name": "Crush at the narrow east link during a sold-out final",
+    "casualty_node": "C-NE",
+    "category": "medical",
+    "background_density": 0.35,
+    "edge_density": {
+      "R-E1": 3.9,
+      "R-N2": 1.9,
+      "E-G2": 1.3
+    },
+    "gates": [
+      { "gate_id": "G2", "arrival_rate_per_s": 3.4, "open_lanes": 6, "installed_lanes": 8 },
+      { "gate_id": "G1", "arrival_rate_per_s": 2.1, "open_lanes": 8, "installed_lanes": 10 },
+      { "gate_id": "G3", "arrival_rate_per_s": 1.4, "open_lanes": 6, "installed_lanes": 10 }
+    ],
+    "report": {
+      "id": "INC-0912",
+      "reporter_role": "steward",
+      "language": "en",
+      "text": "there's a woman collapsed at the top of the east link, it's only three metres wide here and the crowd coming off the north side is still pushing through, we can't hold them"
+    },
+    "fan": {
+      "at_node": "G3",
+      "seat": "SEAT-N",
+      "language": "ta",
+      "accessible": true,
+      "utterance": "என் அம்மாவால் படிக்கட்டுகளில் ஏற முடியாது. நாங்கள் தவறான வாயிலுக்கு வந்துவிட்டோம். எங்கள் இருக்கைக்கு எப்படி செல்வது?"
+    }
+  }
+}

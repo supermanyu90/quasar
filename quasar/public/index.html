@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quasar — venue control room</title>
+<meta name="description" content="A GenAI-native operating system for smart sporting venues: two planes, one barrier.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='14' font-size='14'>🛰️</text></svg>">
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <h1>Quasar</h1>
+    <p>Venue operating system · <span id="venue-name">…</span></p>
+  </div>
+
+  <div class="mode">
+    <label for="venue">Venue</label>
+    <select id="venue"></select>
+  </div>
+
+  <div class="mode">
+    <label for="mode">Model plane</label>
+    <select id="mode">
+      <option value="recorded">Recorded</option>
+      <option value="edge">Edge — real local model</option>
+      <option value="live">Live (Claude)</option>
+      <option value="partition">Partition — no model</option>
+    </select>
+    <input id="live-key" type="password" placeholder="operator key" hidden autocomplete="off">
+  </div>
+</header>
+
+<p class="note" id="mode-note"></p>
+
+<nav class="tabs">
+  <button class="tab active" data-tab="control">Control room</button>
+  <button class="tab" data-tab="fan">Fan</button>
+  <button class="tab" data-tab="ready">Readiness</button>
+  <button class="tab" data-tab="premat">Pre-match</button>
+  <button class="tab" data-tab="audit">Audit</button>
+</nav>
+
+<main>
+  <!-- ─────────────────────────── map ─────────────────────────── -->
+  <section class="map-pane">
+    <svg id="map" viewBox="-168 -168 336 336" role="img" aria-label="Venue plan">
+      <g id="flip" transform="scale(1,-1)">
+        <g id="edges"></g>
+        <g id="routes"></g>
+        <g id="nodes"></g>
+      </g>
+      <g id="labels"></g>
+    </svg>
+
+    <div class="legend">
+      <span><i class="sw los-A"></i>LOS A–C</span>
+      <span><i class="sw los-D"></i>D</span>
+      <span><i class="sw los-E"></i>E</span>
+      <span><i class="sw los-F"></i>F — crush</span>
+      <span><i class="sw svc"></i>service (staff)</span>
+      <span><i class="sw cordon"></i>cordoned</span>
+      <span><i class="sw route-medic"></i>medic</span>
+      <span><i class="sw route-fan"></i>fan</span>
+    </div>
+  </section>
+
+  <!-- ─────────────────────── control room ─────────────────────── -->
+  <section class="panel" id="tab-control">
+
+    <article class="card deterministic">
+      <h2>1 · Deterministic plane <span class="tag">measured</span></h2>
+      <p class="sub">Sensors and mathematics. No model has run yet. Nothing below is anyone's opinion.</p>
+
+      <table id="hotspots"><thead><tr>
+        <th>Corridor</th><th>Density</th><th>LOS</th><th>Trend</th>
+      </tr></thead><tbody></tbody></table>
+
+      <table id="gates"><thead><tr>
+        <th>Gate</th><th>ρ<sub>q</sub></th><th>Lanes</th><th>Status</th>
+      </tr></thead><tbody></tbody></table>
+
+      <div class="floor" id="floor"></div>
+    </article>
+
+    <article class="card">
+      <h2>2 · The report</h2>
+      <p class="sub">A volunteer, on a radio, in the middle of it. No form. No dropdown.</p>
+      <blockquote id="incident-text"></blockquote>
+      <button id="run" class="primary">Run the incident →</button>
+    </article>
+
+    <article class="card" id="agents-card" hidden>
+      <h2>3 · Generative plane <span class="tag">proposes</span></h2>
+      <p class="sub">Every payload is schema-validated, citation-checked, and corroborated
+        against numbers the model did not produce and cannot influence.</p>
+      <div id="agents"></div>
+    </article>
+
+    <article class="card" id="plan-card" hidden>
+      <h2>4 · Human-in-the-loop <span class="tag danger">barrier</span></h2>
+      <p class="sub">P0 and P1 actions do not actuate without a commander's signature.
+        Try to get past it.</p>
+      <ol id="plan-actions"></ol>
+      <div class="actions">
+        <button id="approve-commander" class="primary">Approve as commander</button>
+        <button id="approve-steward">Approve as steward</button>
+        <button id="approve-none">Actuate with no approval</button>
+        <button id="tamper-plan" class="danger">Tamper with the plan</button>
+      </div>
+      <div id="barrier-result"></div>
+    </article>
+
+    <article class="card" id="exec-card" hidden>
+      <h2>5 · Actuation <span class="tag">recomputed</span></h2>
+      <p class="sub">The plan named a medical post. The route, the ETA, and the guarantee it
+        does not cross the cordon are computed from the graph, now.</p>
+      <div id="exec"></div>
+    </article>
+  </section>
+
+  <!-- ───────────────────────────  fan  ─────────────────────────── -->
+  <section class="panel" id="tab-fan" hidden>
+    <article class="card">
+      <h2>Fan concierge</h2>
+      <p class="sub">The agent decides <em>where</em>. The router decides <em>how</em> — and is bound
+        by constraints the agent cannot override.</p>
+
+      <label>Language
+        <select id="fan-lang">
+          <option value="mr">मराठी — Marathi</option>
+          <option value="hi">हिन्दी — Hindi</option>
+          <option value="en">English</option>
+          <option value="ta">தமிழ் — Tamil</option>
+        </select>
+      </label>
+
+      <label>Standing at
+        <select id="fan-node"></select>
+      </label>
+
+      <label>Seat on their ticket
+        <select id="fan-seat">
+          <option value="SEAT-N" selected>SEAT-N — North Stand</option>
+          <option value="SEAT-E">SEAT-E — East Stand</option>
+          <option value="SEAT-S">SEAT-S — South Stand</option>
+          <option value="SEAT-W">SEAT-W — West Stand (no step-free route exists)</option>
+        </select>
+      </label>
+
+      <label class="check">
+        <input type="checkbox" id="fan-accessible" checked>
+        Step-free route required (cannot use stairs)
+      </label>
+
+      <label>Says
+        <textarea id="fan-text" rows="3">माझी आई पायऱ्या चढू शकत नाही आणि आम्ही चुकीच्या गेटवर आलो आहोत. आमच्या जागेपर्यंत कसे जायचे?</textarea>
+      </label>
+
+      <div class="actions">
+        <button id="fan-ask" class="primary">Ask</button>
+        <button id="fan-emergency" class="danger">Report an emergency</button>
+      </div>
+      <div id="fan-result"></div>
+    </article>
+  </section>
+
+  <!-- ────────────────────────  pre-match  ──────────────────────── -->
+  <section class="panel" id="tab-premat" hidden>
+    <article class="card">
+      <h2>Pre-match stress harness</h2>
+      <p class="sub">Findings are not bugs in the code. They are defects in the <em>venue</em> —
+        found before the gates open.</p>
+      <label>Scenario class
+        <select id="stress-kind">
+          <option value="gate_failure">Gate failure</option>
+          <option value="weather_evacuation">Weather evacuation</option>
+          <option value="medical_surge">Medical surge</option>
+          <option value="vip_movement">VIP movement</option>
+          <option value="power_loss">Power loss</option>
+          <option value="pitch_invasion">Pitch invasion</option>
+        </select>
+      </label>
+      <button id="stress-run" class="primary">Fire scenarios at the venue</button>
+      <div id="stress-result"></div>
+    </article>
+  </section>
+
+  <!-- ────────────────────────  readiness  ─────────────────────── -->
+  <section class="panel" id="tab-ready" hidden>
+    <article class="card">
+      <h2>Venue readiness <span class="tag danger">can this venue open?</span></h2>
+      <p class="sub">The question a venue-blind system cannot ask. Two venues, the same
+        code, and they fail for opposite reasons — one has a stand with no step-free exit,
+        the other cannot lawfully tell its own crowd to evacuate in the language they read.</p>
+      <button id="ready-run" class="primary">Audit this venue</button>
+      <div id="ready-result"></div>
+    </article>
+  </section>
+
+  <!-- ──────────────────────────  audit  ────────────────────────── -->
+  <section class="panel" id="tab-audit" hidden>
+    <article class="card">
+      <h2>Audit chain</h2>
+      <p class="sub">Every record commits to its predecessor. Alter one and every record
+        after it stops matching — you cannot rewrite what the system proposed after you
+        have seen how it turned out.</p>
+      <div class="actions">
+        <button id="verify" class="primary">Verify chain</button>
+        <button id="tamper-audit" class="danger">Tamper with a record</button>
+      </div>
+      <div id="verify-result"></div>
+      <div id="audit-list"></div>
+    </article>
+  </section>
+</main>
+
+<footer>
+  <p>Two planes, one barrier. The model may choose <em>which</em> medical post to dispatch
+     from; the ETA, the path, and the guarantee that the path does not cross the cordon are
+     computed from the graph, every time.</p>
+</footer>
+
+<script src="/app.js"></script>
+</body>
+</html>
