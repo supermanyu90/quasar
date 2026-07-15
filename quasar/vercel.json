@@ -12,6 +12,10 @@
     {
       "source": "/api/(.*)",
       "headers": [{ "key": "cache-control", "value": "no-store" }]
+    },
+    {
+      "source": "/(index.html|app.js|styles.css)?",
+      "headers": [{ "key": "cache-control", "value": "no-store, must-revalidate" }]
     }
   ]
 }

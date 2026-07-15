@@ -78,6 +78,13 @@ class Router(SimpleHTTPRequestHandler):
             self.send_response(204)
             self.end_headers()
 
+    def end_headers(self) -> None:
+        # Never let the browser cache the console during development. Editing a file
+        # while the page is open otherwise leaves a stale index.html running against
+        # a fresh app.js, and the mismatch throws on an element that "isn't there".
+        self.send_header("Cache-Control", "no-store, must-revalidate")
+        super().end_headers()
+
     def log_message(self, fmt: str, *args) -> None:
         sys.stderr.write(f"  {self.command} {self.path} -> {args[1] if len(args) > 1 else ''}\n")
 
