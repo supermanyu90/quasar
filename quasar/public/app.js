@@ -732,6 +732,28 @@ async function loadVenue(venueId) {
 
 /* ── boot ────────────────────────────────────────────────────────── */
 
+/* ── theme ───────────────────────────────────────────────────────── */
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  const btn = $('theme-toggle');
+  if (btn) btn.textContent = theme === 'dark' ? '☀️' : '🌙';
+  try { localStorage.setItem('quasar-theme', theme); } catch (_) {}
+}
+
+function wireTheme() {
+  // Light by default — the console should feel welcoming, not like a terminal.
+  // ?theme= wins (deep links, demos), then a remembered choice, then light.
+  const q = new URLSearchParams(location.search).get('theme');
+  let theme = q === 'dark' || q === 'light' ? q : null;
+  if (!theme) { try { theme = localStorage.getItem('quasar-theme'); } catch (_) {} }
+  applyTheme(theme || 'light');
+  $('theme-toggle').onclick = () => {
+    const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    applyTheme(next);
+  };
+}
+
 function wireTabs() {
   for (const tab of document.querySelectorAll('.tab')) {
     tab.onclick = () => {
@@ -767,6 +789,7 @@ function wireMapView() {
 }
 
 async function boot() {
+  wireTheme();
   wireTabs();
   wireMapView();
 
