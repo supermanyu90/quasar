@@ -199,9 +199,44 @@ def topology_readiness(profile: VenueProfile, *, per_kind: int = 2) -> list[Chec
     return list(seen.values())
 
 
+def provenance_readiness(profile: VenueProfile) -> list[Check]:
+    """Is the graph a real survey, or a representative model?
+
+    This is the honesty check. A representative graph is right for scale, planning
+    and training, and it is *not* a surveyed floor plan -- the corridor widths and
+    step-free routes are fitted from public capacity, not measured. Every route and
+    evacuation time computed on it inherits that caveat, and an operator must know
+    it before trusting the system in a live control room. It is not a blocker (the
+    hand-authored demo venues are representative too), but it is the first thing the
+    audit says.
+    """
+    if profile.surveyed:
+        return []
+    return [
+        Check(
+            id="provenance.representative",
+            severity="critical",
+            title="Topology is representative, not surveyed",
+            detail=(
+                f"{profile.name}'s graph is a parametric model fitted to its public "
+                f"capacity ({profile.capacity:,}) and gate count -- not a floor-plan "
+                "survey. It is correct for scale, planning and training. It is not a "
+                "substitute for measured corridor widths and verified step-free routes, "
+                "and every route and evacuation time here inherits that caveat."
+            ),
+            remedy=(
+                "Commission a floor-plan survey (corridor widths, gate lane counts, "
+                "step-free routes) and load it as topology: \"surveyed\" before using "
+                "this venue for live operations."
+            ),
+        )
+    ]
+
+
 def audit(profile: VenueProfile) -> Readiness:
     """The full pre-season audit for one venue."""
     checks: list[Check] = []
+    checks += provenance_readiness(profile)
     checks += accessibility_readiness(profile)
     checks += language_readiness(profile)
     checks += topology_readiness(profile)

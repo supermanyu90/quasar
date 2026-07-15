@@ -87,7 +87,9 @@ class VenueProfile:
 
     id: str
     name: str
+    fifa_name: str
     city: str
+    country: str
     capacity: int
     venue: Venue
     # Languages this venue's crowd actually speaks. Drives the Tier-1 readiness
@@ -95,8 +97,16 @@ class VenueProfile:
     # own majority is not ready, however good its software is.
     languages: tuple[LangCode, ...]
     service_rate_per_s: float
+    # "surveyed" (real floor-plan survey) or "representative" (parametric model from
+    # public capacity + gate count). Defaults to representative -- the conservative
+    # assumption when provenance is unknown. The readiness audit and UI surface it.
+    topology: str
     labels: Mapping[str, Mapping[LangCode, str]]
     fixture: Fixture
+
+    @property
+    def surveyed(self) -> bool:
+        return self.topology == "surveyed"
 
     @property
     def zones(self) -> frozenset[str]:
@@ -179,11 +189,14 @@ def load_spec(spec: Mapping[str, Any]) -> VenueProfile:
     return VenueProfile(
         id=spec["id"],
         name=spec["name"],
+        fifa_name=spec.get("fifa_name", spec["name"]),
         city=spec["city"],
+        country=spec.get("country", ""),
         capacity=int(spec["capacity"]),
         venue=venue,
         languages=tuple(spec["languages"]),
         service_rate_per_s=float(spec["service_rate_per_s"]),
+        topology=spec.get("topology", "representative"),
         labels=_labels(spec, venue),
         fixture=fixture,
     )

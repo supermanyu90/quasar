@@ -50,8 +50,11 @@ Weidmann's published one, and the residual table that motivates `safe_speed`.
 
 ```
 venues/          venue specs — adding a stadium is a data change, not a code change
-  national-stadium.json   Mumbai, 60,000, oval
-  coastal-arena.json      Chennai, 12,000, square — a structurally different building
+  national-stadium.json   Mumbai, 60,000, oval (hand-authored)
+  coastal-arena.json      Chennai, 12,000, square (hand-authored)
+  fwc-*.json              the 16 FIFA World Cup 2026 host venues, generated from
+                          real public capacity/gate data — flagged topology:
+                          "representative" (a model, not a surveyed floor plan)
 src/quasar/
   types.py        domain types crossing every boundary
   crowd.py        Weidmann speed-density, Fruin LOS, the conservative envelope
@@ -71,4 +74,7 @@ src/quasar/
   venue_spec.py   loads + validates a venue from JSON (schema + referential integrity)
   readiness.py    can this venue open? language + accessibility + topology audit
   web.py          the venue-aware control-room adapter
+  venue_factory.py  parametric representative graphs from real venue metadata
+tools/
+  gen_fifa_venues.py   regenerate the 16 FIFA venue specs (deterministic)
 ```

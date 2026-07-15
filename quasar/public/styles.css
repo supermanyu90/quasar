@@ -106,7 +106,58 @@ main {
   border-radius: 10px;
   padding: .75rem;
 }
-#map { width: 100%; height: auto; display: block; }
+#map { width: 100%; height: auto; display: block; touch-action: none; }
+
+.map-head {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  margin-bottom: .5rem;
+  flex-wrap: wrap;
+}
+.viewtoggle { display: inline-flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+.viewbtn {
+  border: none; border-radius: 0; background: var(--panel-2);
+  padding: .3rem .8rem; color: var(--dim); font-size: .82rem;
+}
+.viewbtn.active { background: var(--accent); color: #06121f; font-weight: 600; }
+.check.inline { display: inline-flex; align-items: center; gap: .4rem; margin: 0; font-size: .8rem; }
+.check.inline input { width: auto; }
+.hint { color: var(--dim); font-size: .72rem; margin-left: auto; }
+
+/* isometric 3D */
+.plate { stroke: var(--line); stroke-width: .5; }
+.plate.L0 { fill: rgba(60, 71, 86, 0.18); }
+.plate.L1 { fill: rgba(70, 83, 106, 0.16); }
+.plate.L2 { fill: rgba(110, 125, 144, 0.14); }
+.iso-edge { stroke-linecap: round; fill: none; }
+.iso-edge.los-A, .iso-edge.los-B, .iso-edge.los-C { stroke: var(--los-a); stroke-width: 2; }
+.iso-edge.los-D { stroke: var(--los-d); stroke-width: 2; }
+.iso-edge.los-E { stroke: var(--los-e); stroke-width: 2.4; }
+.iso-edge.los-F { stroke: var(--los-f); stroke-width: 3; }
+.iso-edge.ramp { stroke: #3fd07a; stroke-width: 3; }
+.iso-edge.stair { stroke: var(--danger); stroke-width: 2; stroke-dasharray: 3 3; }
+.iso-edge.service { stroke: #3c4756; stroke-width: 1.6; stroke-dasharray: 2 4; }
+.iso-edge.cordoned { stroke: var(--danger); stroke-dasharray: 2 4; }
+.iso-edge.dim { opacity: 0.12; }
+.iso-pillar { stroke: rgba(255,255,255,0.10); stroke-width: .6; }
+.iso-node { stroke: #0d1117; stroke-width: .6; }
+.iso-route { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.iso-route.medic { stroke: var(--medic); stroke-width: 3.5; }
+.iso-route.fan { stroke: var(--fan); stroke-width: 3.5; }
+.iso-label { fill: var(--dim); font-size: 5px; text-anchor: middle; }
+.sw.ramp { background: #3fd07a; }
+.sw.stair { background: var(--danger); }
+
+.provenance {
+  margin: .5rem 0 0;
+  padding: .4rem .6rem;
+  border-left: 3px solid var(--warn);
+  background: #2a2213;
+  border-radius: 4px;
+  font-size: .74rem;
+  color: #ecd9a5;
+}
 
 .edge { stroke-linecap: round; fill: none; }
 .edge.los-A, .edge.los-B, .edge.los-C { stroke: var(--los-a); }

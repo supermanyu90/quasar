@@ -208,8 +208,11 @@ def venues_json() -> dict[str, Any]:
             {
                 "id": p.id,
                 "name": p.name,
+                "fifa_name": p.fifa_name,
                 "city": p.city,
+                "country": p.country,
                 "capacity": p.capacity,
+                "topology": p.topology,
                 "languages": list(p.languages),
                 "nodes": len(p.venue.nodes),
                 "edges": len(p.venue.edges),
@@ -225,8 +228,11 @@ def venue_json(venue_id: str) -> dict[str, Any]:
     return {
         "id": p.id,
         "name": p.name,
+        "fifa_name": p.fifa_name,
         "city": p.city,
+        "country": p.country,
         "capacity": p.capacity,
+        "topology": p.topology,
         "languages": list(p.languages),
         "nodes": [
             {

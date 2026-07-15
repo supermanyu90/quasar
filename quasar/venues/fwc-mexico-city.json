@@ -1,0 +1,758 @@
+{
+  "schema": "quasar.venue_spec.v1",
+  "id": "fwc-mexico-city",
+  "name": "Estadio Azteca",
+  "fifa_name": "Estadio Azteca",
+  "city": "Mexico City",
+  "country": "Mexico",
+  "capacity": 80824,
+  "topology": "representative",
+  "languages": [
+    "es",
+    "en"
+  ],
+  "service_rate_per_s": 0.58,
+  "zones": {
+    "NORTH": {
+      "en": "North Stand",
+      "es": "Tribuna Norte",
+      "fr": "Tribune Nord"
+    },
+    "EAST": {
+      "en": "East Stand",
+      "es": "Tribuna Este",
+      "fr": "Tribune Est"
+    },
+    "SOUTH": {
+      "en": "South Stand",
+      "es": "Tribuna Sur",
+      "fr": "Tribune Sud"
+    },
+    "WEST": {
+      "en": "West Stand",
+      "es": "Tribuna Oeste",
+      "fr": "Tribune Ouest"
+    },
+    "GATE": {
+      "en": "the entry gates",
+      "es": "las puertas",
+      "fr": "les portes"
+    }
+  },
+  "nodes": [
+    {
+      "id": "G1",
+      "name": "Gate 1",
+      "x": 0.0,
+      "y": 141.7,
+      "level": 1,
+      "zone": "GATE",
+      "tags": [
+        "gate"
+      ]
+    },
+    {
+      "id": "C1",
+      "name": "Concourse 1",
+      "x": 0.0,
+      "y": 98.1,
+      "level": 1,
+      "zone": "NORTH",
+      "tags": [
+        "concourse"
+      ]
+    },
+    {
+      "id": "G2",
+      "name": "Gate 2",
+      "x": 105.1,
+      "y": 108.6,
+      "level": 1,
+      "zone": "GATE",
+      "tags": [
+        "gate"
+      ]
+    },
+    {
+      "id": "C2",
+      "name": "Concourse 2",
+      "x": 73.6,
+      "y": 75.2,
+      "level": 1,
+      "zone": "NORTH",
+      "tags": [
+        "concourse"
+      ]
+    },
+    {
+      "id": "G3",
+      "name": "Gate 3",
+      "x": 161.0,
+      "y": 24.6,
+      "level": 1,
+      "zone": "GATE",
+      "tags": [
+        "gate"
+      ]
+    },
+    {
+      "id": "C3",
+      "name": "Concourse 3",
+      "x": 112.7,
+      "y": 17.0,
+      "level": 1,
+      "zone": "EAST",
+      "tags": [
+        "concourse"
+      ]
+    },
+    {
+      "id": "G4",
+      "name": "Gate 4",
+      "x": 141.6,
+      "y": -70.9,
+      "level": 1,
+      "zone": "GATE",
+      "tags": [
+        "gate"
+      ]
+    },
+    {
+      "id": "C4",
+      "name": "Concourse 4",
+      "x": 99.1,
+      "y": -49.1,
+      "level": 1,
+      "zone": "EAST",
+      "tags": [
+        "concourse"
+      ]
+    },
+    {
+      "id": "G5",
+      "name": "Gate 5",
+      "x": 55.9,
+      "y": -133.2,
+      "level": 1,
+      "zone": "GATE",
+      "tags": [
+        "gate"
+      ]
+    },
+    {
+      "id": "C5",
+      "name": "Concourse 5",
+      "x": 39.2,
+      "y": -92.2,
+      "level": 1,
+      "zone": "SOUTH",
+      "tags": [
+        "concourse"
+      ]
+    },
+    {
+      "id": "G6",
+      "name": "Gate 6",
+      "x": -55.9,
+      "y": -133.2,
+      "level": 1,
+      "zone": "GATE",
+      "tags": [
+        "gate"
+      ]
+    },
+    {
+      "id": "C6",
+      "name": "Concourse 6",
+      "x": -39.2,
+      "y": -92.2,
+      "level": 1,
+      "zone": "SOUTH",
+      "tags": [
+        "concourse"
+      ]
+    },
+    {
+      "id": "G7",
+      "name": "Gate 7",
+      "x": -141.6,
+      "y": -70.9,
+      "level": 1,
+      "zone": "GATE",
+      "tags": [
+        "gate"
+      ]
+    },
+    {
+      "id": "C7",
+      "name": "Concourse 7",
+      "x": -99.1,
+      "y": -49.1,
+      "level": 1,
+      "zone": "WEST",
+      "tags": [
+        "concourse"
+      ]
+    },
+    {
+      "id": "G8",
+      "name": "Gate 8",
+      "x": -161.0,
+      "y": 24.6,
+      "level": 1,
+      "zone": "GATE",
+      "tags": [
+        "gate"
+      ]
+    },
+    {
+      "id": "C8",
+      "name": "Concourse 8",
+      "x": -112.7,
+      "y": 17.0,
+      "level": 1,
+      "zone": "WEST",
+      "tags": [
+        "concourse"
+      ]
+    },
+    {
+      "id": "G9",
+      "name": "Gate 9",
+      "x": -105.1,
+      "y": 108.6,
+      "level": 1,
+      "zone": "GATE",
+      "tags": [
+        "gate"
+      ]
+    },
+    {
+      "id": "C9",
+      "name": "Concourse 9",
+      "x": -73.6,
+      "y": 75.2,
+      "level": 1,
+      "zone": "NORTH",
+      "tags": [
+        "concourse"
+      ]
+    },
+    {
+      "id": "SEAT-N",
+      "name": "North Bowl",
+      "x": 0,
+      "y": 56.7,
+      "level": 2,
+      "zone": "NORTH",
+      "tags": [
+        "seating"
+      ]
+    },
+    {
+      "id": "SEAT-E",
+      "name": "East Bowl",
+      "x": 65.4,
+      "y": 0,
+      "level": 2,
+      "zone": "EAST",
+      "tags": [
+        "seating"
+      ]
+    },
+    {
+      "id": "SEAT-S",
+      "name": "South Bowl",
+      "x": 0,
+      "y": -56.7,
+      "level": 2,
+      "zone": "SOUTH",
+      "tags": [
+        "seating"
+      ]
+    },
+    {
+      "id": "SEAT-W",
+      "name": "West Bowl",
+      "x": -65.4,
+      "y": 0,
+      "level": 2,
+      "zone": "WEST",
+      "tags": [
+        "seating"
+      ]
+    },
+    {
+      "id": "WC-ACC",
+      "name": "Accessible Washroom",
+      "x": -14.0,
+      "y": 104.1,
+      "level": 1,
+      "zone": "NORTH",
+      "tags": [
+        "washroom",
+        "accessible"
+      ]
+    },
+    {
+      "id": "WC",
+      "name": "Washroom",
+      "x": -25.2,
+      "y": -98.2,
+      "level": 1,
+      "zone": "SOUTH",
+      "tags": [
+        "washroom"
+      ]
+    },
+    {
+      "id": "FNB",
+      "name": "Food Court",
+      "x": 16.0,
+      "y": 106.1,
+      "level": 1,
+      "zone": "NORTH",
+      "tags": [
+        "fnb"
+      ]
+    },
+    {
+      "id": "LOST",
+      "name": "Lost & Found",
+      "x": -55.2,
+      "y": -100.2,
+      "level": 1,
+      "zone": "SOUTH",
+      "tags": [
+        "lost_and_found"
+      ]
+    },
+    {
+      "id": "MED-1",
+      "name": "Medical Post (East)",
+      "x": 130.7,
+      "y": 21.0,
+      "level": 1,
+      "zone": "EAST",
+      "tags": [
+        "medical"
+      ]
+    },
+    {
+      "id": "MED-2",
+      "name": "Medical Post (West)",
+      "x": -130.7,
+      "y": 13.0,
+      "level": 1,
+      "zone": "WEST",
+      "tags": [
+        "medical"
+      ]
+    },
+    {
+      "id": "CONTROL",
+      "name": "Command Centre",
+      "x": -128.7,
+      "y": 27.0,
+      "level": 1,
+      "zone": "WEST",
+      "tags": [
+        "control"
+      ]
+    },
+    {
+      "id": "SVC-E",
+      "name": "Service Corridor East",
+      "x": 80.1,
+      "y": 12,
+      "level": 0,
+      "zone": "EAST",
+      "tags": [
+        "service"
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "id": "E-G1",
+      "u": "G1",
+      "v": "C1",
+      "length_m": 43.6,
+      "width_m": 8.0,
+      "kind": "vomitory",
+      "step_free": true
+    },
+    {
+      "id": "E-G2",
+      "u": "G2",
+      "v": "C2",
+      "length_m": 45.9,
+      "width_m": 8.0,
+      "kind": "vomitory",
+      "step_free": true
+    },
+    {
+      "id": "E-G3",
+      "u": "G3",
+      "v": "C3",
+      "length_m": 48.9,
+      "width_m": 8.0,
+      "kind": "vomitory",
+      "step_free": true
+    },
+    {
+      "id": "E-G4",
+      "u": "G4",
+      "v": "C4",
+      "length_m": 47.8,
+      "width_m": 8.0,
+      "kind": "vomitory",
+      "step_free": true
+    },
+    {
+      "id": "E-G5",
+      "u": "G5",
+      "v": "C5",
+      "length_m": 44.3,
+      "width_m": 8.0,
+      "kind": "vomitory",
+      "step_free": true
+    },
+    {
+      "id": "E-G6",
+      "u": "G6",
+      "v": "C6",
+      "length_m": 44.3,
+      "width_m": 8.0,
+      "kind": "vomitory",
+      "step_free": true
+    },
+    {
+      "id": "E-G7",
+      "u": "G7",
+      "v": "C7",
+      "length_m": 47.8,
+      "width_m": 8.0,
+      "kind": "vomitory",
+      "step_free": true
+    },
+    {
+      "id": "E-G8",
+      "u": "G8",
+      "v": "C8",
+      "length_m": 48.9,
+      "width_m": 8.0,
+      "kind": "vomitory",
+      "step_free": true
+    },
+    {
+      "id": "E-G9",
+      "u": "G9",
+      "v": "C9",
+      "length_m": 45.9,
+      "width_m": 8.0,
+      "kind": "vomitory",
+      "step_free": true
+    },
+    {
+      "id": "R-1",
+      "u": "C1",
+      "v": "C2",
+      "length_m": 77.1,
+      "width_m": 3.5,
+      "kind": "corridor",
+      "step_free": true,
+      "label": "Ring 1"
+    },
+    {
+      "id": "R-2",
+      "u": "C2",
+      "v": "C3",
+      "length_m": 70.1,
+      "width_m": 7.0,
+      "kind": "concourse",
+      "step_free": true,
+      "label": "Ring 2"
+    },
+    {
+      "id": "R-3",
+      "u": "C3",
+      "v": "C4",
+      "length_m": 67.5,
+      "width_m": 7.0,
+      "kind": "concourse",
+      "step_free": true,
+      "label": "Ring 3"
+    },
+    {
+      "id": "R-4",
+      "u": "C4",
+      "v": "C5",
+      "length_m": 73.9,
+      "width_m": 3.5,
+      "kind": "corridor",
+      "step_free": true,
+      "label": "Ring 4"
+    },
+    {
+      "id": "R-5",
+      "u": "C5",
+      "v": "C6",
+      "length_m": 78.3,
+      "width_m": 7.0,
+      "kind": "concourse",
+      "step_free": true,
+      "label": "Ring 5"
+    },
+    {
+      "id": "R-6",
+      "u": "C6",
+      "v": "C7",
+      "length_m": 73.9,
+      "width_m": 7.0,
+      "kind": "concourse",
+      "step_free": true,
+      "label": "Ring 6"
+    },
+    {
+      "id": "R-7",
+      "u": "C7",
+      "v": "C8",
+      "length_m": 67.5,
+      "width_m": 3.5,
+      "kind": "corridor",
+      "step_free": true,
+      "label": "Ring 7"
+    },
+    {
+      "id": "R-8",
+      "u": "C8",
+      "v": "C9",
+      "length_m": 70.1,
+      "width_m": 7.0,
+      "kind": "concourse",
+      "step_free": true,
+      "label": "Ring 8"
+    },
+    {
+      "id": "R-9",
+      "u": "C9",
+      "v": "C1",
+      "length_m": 77.1,
+      "width_m": 7.0,
+      "kind": "concourse",
+      "step_free": true,
+      "label": "Ring 9"
+    },
+    {
+      "id": "STAIR-SEAT-N",
+      "u": "C1",
+      "v": "SEAT-N",
+      "length_m": 41.4,
+      "width_m": 5.0,
+      "kind": "stair",
+      "step_free": false
+    },
+    {
+      "id": "RAMP-SEAT-N",
+      "u": "C2",
+      "v": "SEAT-N",
+      "length_m": 144.1,
+      "width_m": 3.0,
+      "kind": "ramp",
+      "step_free": true
+    },
+    {
+      "id": "STAIR-SEAT-E",
+      "u": "C3",
+      "v": "SEAT-E",
+      "length_m": 50.3,
+      "width_m": 5.0,
+      "kind": "stair",
+      "step_free": false
+    },
+    {
+      "id": "RAMP-SEAT-E",
+      "u": "C4",
+      "v": "SEAT-E",
+      "length_m": 113.1,
+      "width_m": 3.0,
+      "kind": "ramp",
+      "step_free": true
+    },
+    {
+      "id": "STAIR-SEAT-S",
+      "u": "C6",
+      "v": "SEAT-S",
+      "length_m": 52.9,
+      "width_m": 5.0,
+      "kind": "stair",
+      "step_free": false
+    },
+    {
+      "id": "RAMP-SEAT-S",
+      "u": "C5",
+      "v": "SEAT-S",
+      "length_m": 100.4,
+      "width_m": 3.0,
+      "kind": "ramp",
+      "step_free": true
+    },
+    {
+      "id": "STAIR-SEAT-W",
+      "u": "C8",
+      "v": "SEAT-W",
+      "length_m": 50.3,
+      "width_m": 5.0,
+      "kind": "stair",
+      "step_free": false
+    },
+    {
+      "id": "RAMP-SEAT-W",
+      "u": "C7",
+      "v": "SEAT-W",
+      "length_m": 113.1,
+      "width_m": 3.0,
+      "kind": "ramp",
+      "step_free": true
+    },
+    {
+      "id": "SP-WC-ACC",
+      "u": "C1",
+      "v": "WC-ACC",
+      "length_m": 15.2,
+      "width_m": 3.0,
+      "kind": "corridor",
+      "step_free": true
+    },
+    {
+      "id": "SP-WC",
+      "u": "C6",
+      "v": "WC",
+      "length_m": 15.2,
+      "width_m": 3.0,
+      "kind": "stair",
+      "step_free": false
+    },
+    {
+      "id": "SP-FNB",
+      "u": "C1",
+      "v": "FNB",
+      "length_m": 17.9,
+      "width_m": 3.0,
+      "kind": "corridor",
+      "step_free": true
+    },
+    {
+      "id": "SP-LOST",
+      "u": "C6",
+      "v": "LOST",
+      "length_m": 17.9,
+      "width_m": 3.0,
+      "kind": "corridor",
+      "step_free": true
+    },
+    {
+      "id": "SP-MED-1",
+      "u": "C3",
+      "v": "MED-1",
+      "length_m": 18.4,
+      "width_m": 3.0,
+      "kind": "corridor",
+      "step_free": true
+    },
+    {
+      "id": "SP-MED-2",
+      "u": "C8",
+      "v": "MED-2",
+      "length_m": 18.4,
+      "width_m": 3.0,
+      "kind": "corridor",
+      "step_free": true
+    },
+    {
+      "id": "SP-CONTROL",
+      "u": "C8",
+      "v": "CONTROL",
+      "length_m": 18.9,
+      "width_m": 3.0,
+      "kind": "corridor",
+      "step_free": true
+    },
+    {
+      "id": "SVC-1",
+      "u": "MED-1",
+      "v": "SVC-E",
+      "length_m": 40.0,
+      "width_m": 3.0,
+      "kind": "service",
+      "step_free": true,
+      "staff_only": true
+    },
+    {
+      "id": "SVC-2",
+      "u": "SVC-E",
+      "v": "C1",
+      "length_m": 55.0,
+      "width_m": 3.0,
+      "kind": "service",
+      "step_free": true,
+      "staff_only": true
+    }
+  ],
+  "beacons": [
+    "C1",
+    "C2",
+    "C3",
+    "C4",
+    "C5",
+    "C6",
+    "C7",
+    "C8",
+    "C9"
+  ],
+  "scenario": {
+    "name": "Crush at a concourse pinch point, Mexico City",
+    "casualty_node": "C1",
+    "category": "medical",
+    "background_density": 0.35,
+    "edge_density": {
+      "R-1": 3.7,
+      "R-2": 1.9,
+      "E-G1": 1.2
+    },
+    "gates": [
+      {
+        "gate_id": "G1",
+        "arrival_rate_per_s": 5.63,
+        "open_lanes": 8,
+        "installed_lanes": 10
+      },
+      {
+        "gate_id": "G2",
+        "arrival_rate_per_s": 2.61,
+        "open_lanes": 7,
+        "installed_lanes": 10
+      },
+      {
+        "gate_id": "G3",
+        "arrival_rate_per_s": 2.61,
+        "open_lanes": 7,
+        "installed_lanes": 10
+      }
+    ],
+    "report": {
+      "id": "INC-1561",
+      "reporter_role": "steward",
+      "language": "en",
+      "text": "someone's gone down at the pinch by the concourse, the crowd off the stand is still pushing through and it's only a few metres wide here, we can't hold them back"
+    },
+    "fan": {
+      "at_node": "G5",
+      "seat": "SEAT-S",
+      "language": "es",
+      "accessible": true,
+      "utterance": "Mi madre no puede subir escaleras y hemos entrado por la puerta equivocada. ¿Cómo llegamos a nuestros asientos?"
+    }
+  }
+}

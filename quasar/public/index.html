@@ -46,12 +46,22 @@
 <main>
   <!-- ─────────────────────────── map ─────────────────────────── -->
   <section class="map-pane">
+    <div class="map-head">
+      <div class="viewtoggle">
+        <button id="view-2d" class="viewbtn active">Plan</button>
+        <button id="view-3d" class="viewbtn">3D</button>
+      </div>
+      <label class="check inline"><input type="checkbox" id="step-free-only"> Step-free only</label>
+      <span class="hint" id="view-hint">Drag the 3D view to rotate</span>
+    </div>
+
     <svg id="map" viewBox="-168 -168 336 336" role="img" aria-label="Venue plan">
       <g id="flip" transform="scale(1,-1)">
         <g id="edges"></g>
         <g id="routes"></g>
         <g id="nodes"></g>
       </g>
+      <g id="iso" hidden></g>
       <g id="labels"></g>
     </svg>
 
@@ -60,11 +70,15 @@
       <span><i class="sw los-D"></i>D</span>
       <span><i class="sw los-E"></i>E</span>
       <span><i class="sw los-F"></i>F — crush</span>
+      <span><i class="sw ramp"></i>ramp (step-free)</span>
+      <span><i class="sw stair"></i>stair</span>
       <span><i class="sw svc"></i>service (staff)</span>
       <span><i class="sw cordon"></i>cordoned</span>
       <span><i class="sw route-medic"></i>medic</span>
       <span><i class="sw route-fan"></i>fan</span>
     </div>
+
+    <p class="provenance" id="provenance" hidden></p>
   </section>
 
   <!-- ─────────────────────── control room ─────────────────────── -->

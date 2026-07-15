@@ -19,6 +19,9 @@ const state = {
   plan: null,
   brief: null,
   audit: [],
+  view: '2d',      // '2d' | '3d'
+  yaw: 0.62,       // 3D rotation, radians
+  stepFreeOnly: false,
 };
 
 const $ = (id) => document.getElementById(id);
@@ -66,6 +69,39 @@ function los(d) {
 }
 
 /* ── map ─────────────────────────────────────────────────────────── */
+
+function showGroup(g, show) {
+  if (show) g.removeAttribute('hidden');
+  else g.setAttribute('hidden', '');
+}
+
+function kindOf(n) {
+  if (n.tags.includes('gate')) return 'gate';
+  if (n.tags.includes('medical')) return 'medical';
+  if (n.tags.includes('seating')) return 'seating';
+  if (n.tags.includes('concourse')) return 'concourse';
+  if (n.tags.includes('service')) return 'service';
+  return 'other';
+}
+
+// Dispatch between the flat plan and the isometric 3D view. The 2D plan is the
+// authoritative operational view; the 3D view exists for accessibility — you can
+// see, at a glance, which way up to a stand is a ramp and which is a staircase.
+function renderMap() {
+  const threeD = state.view === '3d';
+  // NB: #flip and #iso are SVG <g> elements. SVGElement does not reflect the
+  // `.hidden` IDL property to the attribute the way HTMLElement does, so setting
+  // `.hidden` silently does nothing. Toggle the attribute directly.
+  showGroup($('flip'), !threeD);
+  showGroup($('iso'), threeD);
+  $('view-2d').classList.toggle('active', !threeD);
+  $('view-3d').classList.toggle('active', threeD);
+  $('view-hint').textContent = threeD
+    ? 'Drag to rotate · green = step-free ramp, red = stair'
+    : 'Plan view · switch to 3D to see levels and step-free routes';
+  if (threeD) render3D();
+  else drawMap();
+}
 
 function drawMap() {
   const { nodes, edges } = state.venue;
@@ -139,6 +175,118 @@ function drawRoutes() {
   }
 }
 
+/* ── isometric 3D ────────────────────────────────────────────────────
+ * A hand-rolled axonometric projection of the venue graph — no WebGL, no
+ * dependencies, so it renders under the same content-security policy as
+ * everything else. Levels are stacked (service below, concourse, bowl on top),
+ * and the vertical connectors are colour-coded: a wheelchair user can see which
+ * ramps get them up and which staircases do not. That is the accessibility point.
+ */
+
+const SVGNS = 'http://www.w3.org/2000/svg';
+const LEVEL_LIFT = 34;   // screen units a level rises per storey
+const ISO_TILT = 0.52;   // vertical squash of the ground plane
+
+function project(n) {
+  // Rotate about the vertical axis by yaw, then squash y for the ground plane and
+  // lift by level. Classic axonometric: no perspective, so parallel lines stay
+  // parallel and the plan stays readable.
+  const c = Math.cos(state.yaw), s = Math.sin(state.yaw);
+  const rx = n.x * c - n.y * s;
+  const ry = n.x * s + n.y * c;
+  return { x: rx, y: ry * ISO_TILT - (n.level || 0) * LEVEL_LIFT, depth: ry, level: n.level || 0 };
+}
+
+function convexHull(pts) {
+  if (pts.length < 3) return pts;
+  const p = [...pts].sort((a, b) => a.x - b.x || a.y - b.y);
+  const cross = (o, a, b) => (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x);
+  const lower = [], upper = [];
+  for (const q of p) { while (lower.length >= 2 && cross(lower[lower.length - 2], lower[lower.length - 1], q) <= 0) lower.pop(); lower.push(q); }
+  for (let i = p.length - 1; i >= 0; i--) { const q = p[i]; while (upper.length >= 2 && cross(upper[upper.length - 2], upper[upper.length - 1], q) <= 0) upper.pop(); upper.push(q); }
+  return lower.slice(0, -1).concat(upper.slice(0, -1));
+}
+
+function render3D() {
+  const g = $('iso');
+  g.innerHTML = '';
+  const { nodes, edges } = state.venue;
+  const P = Object.fromEntries(nodes.map((n) => [n.id, project(n)]));
+
+  // Fit the projection to the viewBox.
+  const xs = Object.values(P).map((p) => p.x), ys = Object.values(P).map((p) => p.y);
+  const minX = Math.min(...xs), maxX = Math.max(...xs), minY = Math.min(...ys), maxY = Math.max(...ys);
+  const span = Math.max(maxX - minX, maxY - minY) || 1;
+  const scale = 300 / span;
+  const cx = (minX + maxX) / 2, cy = (minY + maxY) / 2;
+  const tx = (p) => (p.x - cx) * scale;
+  const ty = (p) => (p.y - cy) * scale;
+
+  const add = (tag, attrs, cls) => {
+    const el = document.createElementNS(SVGNS, tag);
+    for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v);
+    if (cls) el.setAttribute('class', cls);
+    g.appendChild(el);
+    return el;
+  };
+
+  // 1. Level plates, drawn bottom-up so higher decks sit on top.
+  const levels = [...new Set(nodes.map((n) => n.level || 0))].sort((a, b) => a - b);
+  for (const lvl of levels) {
+    const hull = convexHull(nodes.filter((n) => (n.level || 0) === lvl).map((n) => ({ x: tx(P[n.id]), y: ty(P[n.id]) })));
+    if (hull.length >= 3) {
+      add('polygon', { points: hull.map((p) => `${p.x},${p.y}`).join(' ') }, `plate L${lvl}`);
+    }
+  }
+
+  const stepFree = state.stepFreeOnly;
+
+  // 2. Edges, painter-sorted by mean depth so nearer ones draw last.
+  const sorted = [...edges].sort((a, b) => (P[a.u].depth + P[a.v].depth) - (P[b.u].depth + P[b.v].depth));
+  for (const e of sorted) {
+    const u = P[e.u], v = P[e.v];
+    let cls = 'iso-edge ';
+    if (state.cordoned.has(e.id)) cls += 'cordoned';
+    else if (e.kind === 'ramp') cls += 'ramp';
+    else if (e.kind === 'stair') cls += 'stair';
+    else if (e.staff_only) cls += 'service';
+    else cls += 'los-' + los(state.density[e.id] ?? 0);
+    // In "step-free only" mode, dim everything a wheelchair user cannot take.
+    if (stepFree && !e.step_free) cls += ' dim';
+    const line = add('line', { x1: tx(u), y1: ty(u), x2: tx(v), y2: ty(v) }, cls);
+    const t = document.createElementNS(SVGNS, 'title');
+    t.textContent = `${e.id} · ${e.kind} · ${e.width_m} m${e.step_free ? ' · step-free' : ' · STEPPED'}`;
+    line.appendChild(t);
+  }
+
+  // 3. Routes (medic / fan), in 3D.
+  for (const [key, route] of Object.entries(state.routes)) {
+    const pts = route.nodes.map((n) => `${tx(P[n])},${ty(P[n])}`).join(' ');
+    add('polyline', { points: pts }, 'iso-route ' + (key.startsWith('medic') ? 'medic' : 'fan'));
+  }
+
+  // 4. Nodes with a short pillar to their deck, back-to-front.
+  const nodeOrder = [...nodes].sort((a, b) => P[a.id].depth - P[b.id].depth);
+  for (const n of nodeOrder) {
+    const p = P[n.id];
+    const kind = kindOf(n);
+    const casualty = n.id === state.venue.casualty_node;
+    // pillar down to the ground plane (level 0 projection of the same x,y)
+    const base = ty({ x: p.x, y: p.y + (n.level || 0) * LEVEL_LIFT / ISO_TILT, level: 0 });
+    if ((n.level || 0) > 0) add('line', { x1: tx(p), y1: ty(p), x2: tx(p), y2: base }, 'iso-pillar');
+    const dot = add('circle', {
+      cx: tx(p), cy: ty(p),
+      r: casualty ? 4 : kind === 'gate' || kind === 'seating' ? 3.2 : 2.2,
+    }, 'iso-node node ' + (casualty ? 'casualty' : kind));
+    const t = document.createElementNS(SVGNS, 'title');
+    t.textContent = `${n.id} — ${n.name} (level ${n.level})`;
+    dot.appendChild(t);
+    if (kind === 'gate' || kind === 'seating' || kind === 'medical') {
+      add('text', { x: tx(p), y: ty(p) - 6 }, 'iso-label').textContent = n.id;
+    }
+  }
+}
+
 /* ── deterministic plane ─────────────────────────────────────────── */
 
 function renderState(s) {
@@ -174,7 +322,7 @@ function renderState(s) {
   $('floor').innerHTML =
     `<b>Severity floor: ${s.severity_floor}</b> — ${s.severity_floor_reason}`;
   $('incident-text').textContent = `“${s.incident.text}”`;
-  drawMap();
+  renderMap();
 }
 
 /* ── agents ──────────────────────────────────────────────────────── */
@@ -217,7 +365,7 @@ async function runIncident() {
   $('agents-card').hidden = false;
   $('plan-card').hidden = true;
   $('exec-card').hidden = true;
-  state.routes = {}; state.cordoned.clear(); drawMap();
+  state.routes = {}; state.cordoned.clear(); renderMap();
 
   const spinner = el('p', 'spin', mode() === 'edge' ? 'Running real inference on the edge model… (10–30s per agent)' : 'Running…');
   agents.appendChild(spinner);
@@ -332,7 +480,7 @@ function renderExecution(x) {
 
   state.cordoned = new Set(x.cordoned);
   state.routes = x.routes;
-  drawMap();
+  renderMap();
 
   for (const [key, r] of Object.entries(x.routes)) {
     const m = el('div', 'metric');
@@ -409,7 +557,7 @@ async function askConcierge(utterance) {
 
     if (data.route) {
       state.routes = { ...state.routes, ['fan:' + data.route.destination]: data.route };
-      drawRoutes();
+      renderMap();
       const m = el('div', 'metric');
       m.append(
         el('span', null, `${data.route.profile} route → ${data.route.destination}`),
@@ -531,7 +679,22 @@ async function loadVenue(venueId) {
 
   const [venue, s] = await Promise.all([api('venue'), api('state')]);
   state.venue = venue;
-  $('venue-name').textContent = `${venue.name} · ${venue.city} · ${venue.capacity.toLocaleString()}`;
+  // Show the tournament name where FIFA uses one, with the real name in parentheses.
+  const title = venue.fifa_name && venue.fifa_name !== venue.name
+    ? `${venue.fifa_name} (${venue.name})` : venue.name;
+  $('venue-name').textContent = `${title} · ${venue.city} · ${venue.capacity.toLocaleString()}`;
+
+  // The honesty stamp: a representative graph is not a surveyed floor plan, and the
+  // console never lets you forget it.
+  const prov = $('provenance');
+  if (venue.topology === 'representative') {
+    prov.hidden = false;
+    prov.textContent = 'Representative topology — a model fitted to this venue’s '
+      + 'public capacity and gate count, not a surveyed floor plan. Correct for scale '
+      + 'and planning; not for live operations.';
+  } else {
+    prov.hidden = true;
+  }
 
   // The fan panel is the venue's fan: their language, their seat, their words.
   const sel = $('fan-node');
@@ -580,8 +743,32 @@ function wireTabs() {
   }
 }
 
+function wireMapView() {
+  $('view-2d').onclick = () => { state.view = '2d'; renderMap(); };
+  $('view-3d').onclick = () => { state.view = '3d'; renderMap(); };
+  $('step-free-only').onchange = (e) => { state.stepFreeOnly = e.target.checked; renderMap(); };
+
+  // Drag the 3D view to rotate about the vertical axis.
+  const svg = $('map');
+  let dragging = false, lastX = 0;
+  svg.addEventListener('pointerdown', (e) => {
+    if (state.view !== '3d') return;
+    dragging = true; lastX = e.clientX; svg.setPointerCapture(e.pointerId);
+  });
+  svg.addEventListener('pointermove', (e) => {
+    if (!dragging) return;
+    state.yaw += (e.clientX - lastX) * 0.01;
+    lastX = e.clientX;
+    render3D();
+  });
+  const stop = (e) => { dragging = false; try { svg.releasePointerCapture(e.pointerId); } catch (_) {} };
+  svg.addEventListener('pointerup', stop);
+  svg.addEventListener('pointercancel', stop);
+}
+
 async function boot() {
   wireTabs();
+  wireMapView();
 
   $('mode').onchange = () => {
     const live = mode() === 'live';
@@ -620,6 +807,7 @@ async function boot() {
 
   const q = new URLSearchParams(location.search);
   const chosen = venues.some((v) => v.id === q.get('venue')) ? q.get('venue') : fallback;
+  if (q.get('view') === '3d') { state.view = '3d'; }
   picker.value = chosen;
   await loadVenue(chosen);
 

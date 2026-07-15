@@ -419,8 +419,20 @@ SCHEMAS: Mapping[str, Mapping[str, Any]] = {
             "schema": {"const": VENUE_SPEC},
             "id": {"type": "string", "pattern": r"^[a-z0-9-]{3,40}$"},
             "name": {"type": "string", "minLength": 3, "maxLength": 80},
+            # The name used at the tournament (FIFA does not allow sponsor names),
+            # kept alongside the real one so a fan sees "New York New Jersey Stadium"
+            # while operations still recognises MetLife.
+            "fifa_name": {"type": "string", "minLength": 3, "maxLength": 80},
             "city": {"type": "string", "minLength": 2, "maxLength": 60},
+            "country": {"type": "string", "minLength": 2, "maxLength": 40},
             "capacity": {"type": "integer", "minimum": 100, "maximum": 200000},
+            # Where the graph came from. "surveyed" is a real floor-plan survey with
+            # measured corridor widths and verified step-free routes. "representative"
+            # is a parametric model fitted to the venue's public capacity and gate
+            # count -- correct for scale and planning, NOT a substitute for a survey,
+            # and the readiness audit and UI say so. Defaulting to representative when
+            # absent is the conservative, honest assumption.
+            "topology": {"type": "string", "enum": ["surveyed", "representative"]},
             # The languages this venue's crowd actually speaks -- not the languages
             # the software happens to support. The gap between those two is the
             # readiness finding.
