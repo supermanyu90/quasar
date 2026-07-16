@@ -22,7 +22,7 @@ The `anthropic` SDK is optional and is needed only to call a real model
 PYTHONPATH=src python3 -m unittest discover -s tests -t .
 ```
 
-145 tests, ~0.1 s, no network.
+202 tests, ~0.2 s, no network.
 
 ## Run the demo
 
@@ -59,7 +59,7 @@ src/quasar/
   types.py        domain types crossing every boundary
   crowd.py        Weidmann speed-density, Fruin LOS, the conservative envelope
   queueing.py     M/M/c turnstiles, Erlang-B/C, the 0.90 trigger
-  venue.py        the stadium graph: 35 nodes, 41 edges, 15 beacons
+  venue.py        the venue graph primitives (the graphs themselves are data, in venues/)
   routing.py      density-aware Dijkstra; fan / accessible / staff / responder profiles
   positioning.py  graph-constrained particle filter over BLE / Wi-Fi RTT
   sops.py         the standing procedure corpus (the ground truth for RAG)
@@ -74,6 +74,7 @@ src/quasar/
   venue_spec.py   loads + validates a venue from JSON (schema + referential integrity)
   readiness.py    can this venue open? language + accessibility + topology audit
   amenities.py    the attendee amenity catalogue (icons, tags, calm-route rule)
+  alignment.py    the problem-statement guide as data (served at /api/guide)
   web.py          the venue-aware control-room adapter
   venue_factory.py  parametric representative graphs from real venue metadata
 tools/
