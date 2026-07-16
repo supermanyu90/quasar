@@ -641,6 +641,73 @@ async function tamperAudit() {
   await verifyChain();
 }
 
+/* ── attendee companion ──────────────────────────────────────────── */
+
+async function loadAmenities() {
+  const grid = $('amenity-grid');
+  grid.innerHTML = '';
+  $('wayfind-result').innerHTML = '';
+  const data = await api('amenities');
+  const byGroup = {};
+  for (const a of data.amenities) (byGroup[a.group] ||= []).push(a);
+  for (const g of data.groups) {
+    const items = byGroup[g.key] || [];
+    if (!items.length) continue;
+    const sec = el('div', 'amenity-group');
+    sec.appendChild(el('h4', null, g.label));
+    const row = el('div', 'amenity-grid');
+    for (const a of items) {
+      const b = el('button', 'amenity-btn');
+      b.type = 'button';
+      b.disabled = !a.available;
+      if (!a.available) b.title = 'Not mapped at this venue';
+      b.appendChild(el('span', 'ico', a.icon));
+      b.appendChild(el('span', null, a.label));
+      b.onclick = () => wayfindTo(a.key);
+      row.appendChild(b);
+    }
+    sec.appendChild(row);
+    grid.appendChild(sec);
+  }
+}
+
+async function wayfindTo(key) {
+  const out = $('wayfind-result');
+  out.innerHTML = '<p class="spin">Finding you the best way…</p>';
+  try {
+    const d = await api('wayfind', {
+      from_node: $('fan-node').value,
+      amenity: key,
+      accessible: $('fan-accessible').checked,
+      calm: $('fan-calm').checked,
+      language: $('fan-lang').value,
+      seat: $('fan-seat').value,
+      cordoned: [...state.cordoned],
+    });
+    out.innerHTML = '';
+    if (d.route) {
+      // Draw it on the shared map (visible on the left in every tab).
+      state.routes = { ...state.routes, ['fan:' + d.route.destination]: d.route };
+      renderMap();
+    }
+    const card = el('div', 'wayfind-card' + (d.route ? '' : ' miss'));
+    const big = el('div', 'big');
+    big.append(el('span', 'ico', d.icon), el('span', null, d.destination ? d.destination.name : d.label));
+    card.appendChild(big);
+    card.appendChild(el('div', 'msg', d.message));
+    if (d.destination && d.destination.info) card.appendChild(el('div', 'info', d.destination.info));
+    if (d.route) {
+      card.appendChild(el('div', 'info', `Worst crowding on the way: level of service ${d.route.worst_los}.`));
+      card.appendChild(el('div', 'steps', d.route.nodes.join(' → ')));
+      if (d.alternatives) card.appendChild(el('div', 'info', `+${d.alternatives} more of these nearby.`));
+    }
+    out.appendChild(card);
+  } catch (e) {
+    out.innerHTML = '';
+    out.appendChild(el('div', 'reason', e.message));
+  }
+}
+
 /* ── readiness ───────────────────────────────────────────────────── */
 
 async function runReadiness() {
@@ -726,6 +793,7 @@ async function loadVenue(venueId) {
 
   ['agents-card', 'plan-card', 'exec-card'].forEach((id) => { $(id).hidden = true; });
   $('ready-result').innerHTML = '';
+  await loadAmenities();
   renderState(s);
   renderAudit();
 }
@@ -833,6 +901,11 @@ async function boot() {
   if (q.get('view') === '3d') { state.view = '3d'; }
   picker.value = chosen;
   await loadVenue(chosen);
+
+  const tab = q.get('tab');
+  if (tab) document.querySelector(`.tab[data-tab="${tab}"]`)?.click();
+  const find = q.get('find');
+  if (find) await wayfindTo(find);
 
   // Deep links: ?run=1 walks the incident, &approve=commander signs it. Useful for
   // demoing to someone who should not have to be told which buttons to press, and

@@ -425,6 +425,89 @@
       "tags": [
         "service"
       ]
+    },
+    {
+      "id": "MERCH",
+      "name": "Team Store",
+      "x": -50,
+      "y": 98,
+      "level": 1,
+      "zone": "NORTH",
+      "tags": [
+        "merch"
+      ],
+      "info": "Official kit & souvenirs"
+    },
+    {
+      "id": "LOUNGE",
+      "name": "Members' Lounge",
+      "x": 90,
+      "y": 38,
+      "level": 1,
+      "zone": "EAST",
+      "tags": [
+        "lounge"
+      ],
+      "info": "Seating, bar, step-free"
+    },
+    {
+      "id": "ATM",
+      "name": "Cash Machine",
+      "x": 10,
+      "y": -108,
+      "level": 1,
+      "zone": "SOUTH",
+      "tags": [
+        "atm"
+      ]
+    },
+    {
+      "id": "WATER",
+      "name": "Water Refill",
+      "x": -110,
+      "y": 22,
+      "level": 1,
+      "zone": "WEST",
+      "tags": [
+        "water"
+      ],
+      "info": "Free · bring a bottle"
+    },
+    {
+      "id": "CHARGE",
+      "name": "Charging Point",
+      "x": 70,
+      "y": 98,
+      "level": 1,
+      "zone": "NORTH",
+      "tags": [
+        "charging"
+      ],
+      "info": "USB-A / USB-C"
+    },
+    {
+      "id": "FAMILY",
+      "name": "Family & Baby Care",
+      "x": 50,
+      "y": -82,
+      "level": 1,
+      "zone": "SOUTH",
+      "tags": [
+        "family"
+      ],
+      "info": "Changing, feeding, quiet"
+    },
+    {
+      "id": "QUIET",
+      "name": "Quiet / Prayer Room",
+      "x": -90,
+      "y": -38,
+      "level": 1,
+      "zone": "WEST",
+      "tags": [
+        "quiet"
+      ],
+      "info": "Low light, low noise"
     }
   ],
   "edges": [
@@ -847,6 +930,69 @@
       "kind": "service",
       "step_free": true,
       "staff_only": true
+    },
+    {
+      "id": "SP-MERCH",
+      "u": "C-N1",
+      "v": "MERCH",
+      "length_m": 12.8,
+      "width_m": 3.0,
+      "kind": "corridor",
+      "step_free": true
+    },
+    {
+      "id": "SP-LOUNGE",
+      "u": "C-E1",
+      "v": "LOUNGE",
+      "length_m": 12.8,
+      "width_m": 3.0,
+      "kind": "corridor",
+      "step_free": true
+    },
+    {
+      "id": "SP-ATM",
+      "u": "C-S2",
+      "v": "ATM",
+      "length_m": 12.8,
+      "width_m": 3.0,
+      "kind": "corridor",
+      "step_free": true
+    },
+    {
+      "id": "SP-WATER",
+      "u": "C-W1",
+      "v": "WATER",
+      "length_m": 12.8,
+      "width_m": 3.0,
+      "kind": "corridor",
+      "step_free": true
+    },
+    {
+      "id": "SP-CHARGE",
+      "u": "C-N3",
+      "v": "CHARGE",
+      "length_m": 12.8,
+      "width_m": 3.0,
+      "kind": "corridor",
+      "step_free": true
+    },
+    {
+      "id": "SP-FAMILY",
+      "u": "C-S3",
+      "v": "FAMILY",
+      "length_m": 12.8,
+      "width_m": 3.0,
+      "kind": "corridor",
+      "step_free": true
+    },
+    {
+      "id": "SP-QUIET",
+      "u": "C-W2",
+      "v": "QUIET",
+      "length_m": 12.8,
+      "width_m": 3.0,
+      "kind": "corridor",
+      "step_free": true
     }
   ],
   "beacons": [

@@ -261,8 +261,8 @@
       ]
     },
     {
-      "id": "WC-ACC",
-      "name": "Accessible Washroom",
+      "id": "WC-N-ACC",
+      "name": "North Accessible Restroom",
       "x": -14.0,
       "y": 96.7,
       "level": 1,
@@ -273,26 +273,51 @@
       ]
     },
     {
-      "id": "WC",
-      "name": "Washroom",
+      "id": "WC-S-ACC",
+      "name": "South Accessible Restroom",
       "x": 14.0,
       "y": -96.7,
       "level": 1,
       "zone": "SOUTH",
       "tags": [
+        "washroom",
+        "accessible"
+      ]
+    },
+    {
+      "id": "WC-E",
+      "name": "East Restroom",
+      "x": 117.8,
+      "y": -8.0,
+      "level": 1,
+      "zone": "EAST",
+      "tags": [
         "washroom"
       ]
     },
     {
-      "id": "FNB",
-      "name": "Food Court",
+      "id": "FNB-N",
+      "name": "North Food Court",
       "x": 16.0,
       "y": 98.7,
       "level": 1,
       "zone": "NORTH",
       "tags": [
         "fnb"
-      ]
+      ],
+      "info": "Cashless · veg & halal options"
+    },
+    {
+      "id": "FNB-S",
+      "name": "South Kiosks",
+      "x": -16.0,
+      "y": -82.7,
+      "level": 1,
+      "zone": "SOUTH",
+      "tags": [
+        "fnb"
+      ],
+      "info": "Cashless · snacks & drinks"
     },
     {
       "id": "LOST",
@@ -303,29 +328,32 @@
       "zone": "SOUTH",
       "tags": [
         "lost_and_found"
-      ]
+      ],
+      "info": "Open all match"
     },
     {
       "id": "MED-1",
-      "name": "Medical Post (East)",
+      "name": "First Aid (East)",
       "x": 123.8,
       "y": 4.0,
       "level": 1,
       "zone": "EAST",
       "tags": [
         "medical"
-      ]
+      ],
+      "info": "Staffed paramedics"
     },
     {
       "id": "MED-2",
-      "name": "Medical Post (West)",
+      "name": "First Aid (West)",
       "x": -123.8,
       "y": -4.0,
       "level": 1,
       "zone": "WEST",
       "tags": [
         "medical"
-      ]
+      ],
+      "info": "Staffed paramedics"
     },
     {
       "id": "CONTROL",
@@ -337,6 +365,89 @@
       "tags": [
         "control"
       ]
+    },
+    {
+      "id": "MERCH",
+      "name": "Team Store",
+      "x": 121.8,
+      "y": -10.0,
+      "level": 1,
+      "zone": "EAST",
+      "tags": [
+        "merch"
+      ],
+      "info": "Official kit & souvenirs"
+    },
+    {
+      "id": "LOUNGE",
+      "name": "Members' Lounge",
+      "x": 20.0,
+      "y": 84.7,
+      "level": 1,
+      "zone": "NORTH",
+      "tags": [
+        "lounge"
+      ],
+      "info": "Seating, bar, step-free"
+    },
+    {
+      "id": "ATM",
+      "name": "Cash Machine",
+      "x": -93.8,
+      "y": 10.0,
+      "level": 1,
+      "zone": "WEST",
+      "tags": [
+        "atm"
+      ]
+    },
+    {
+      "id": "WATER",
+      "name": "Water Refill",
+      "x": 8.0,
+      "y": -80.7,
+      "level": 1,
+      "zone": "SOUTH",
+      "tags": [
+        "water"
+      ],
+      "info": "Free · bring a bottle"
+    },
+    {
+      "id": "CHARGE",
+      "name": "Charging Point",
+      "x": 115.8,
+      "y": 12.0,
+      "level": 1,
+      "zone": "EAST",
+      "tags": [
+        "charging"
+      ],
+      "info": "USB-A / USB-C"
+    },
+    {
+      "id": "FAMILY",
+      "name": "Family & Baby Care",
+      "x": -20.0,
+      "y": 86.7,
+      "level": 1,
+      "zone": "NORTH",
+      "tags": [
+        "family"
+      ],
+      "info": "Changing, feeding, quiet"
+    },
+    {
+      "id": "QUIET",
+      "name": "Quiet / Prayer Room",
+      "x": -117.8,
+      "y": -12.0,
+      "level": 1,
+      "zone": "WEST",
+      "tags": [
+        "quiet"
+      ],
+      "info": "Low light, low noise"
     },
     {
       "id": "SVC-E",
@@ -576,27 +687,45 @@
       "step_free": true
     },
     {
-      "id": "SP-WC-ACC",
+      "id": "SP-WC-N-ACC",
       "u": "C1",
-      "v": "WC-ACC",
+      "v": "WC-N-ACC",
       "length_m": 15.2,
       "width_m": 3.0,
       "kind": "corridor",
       "step_free": true
     },
     {
-      "id": "SP-WC",
+      "id": "SP-WC-S-ACC",
       "u": "C5",
-      "v": "WC",
+      "v": "WC-S-ACC",
       "length_m": 15.2,
+      "width_m": 3.0,
+      "kind": "corridor",
+      "step_free": true
+    },
+    {
+      "id": "SP-WC-E",
+      "u": "C3",
+      "v": "WC-E",
+      "length_m": 14.4,
       "width_m": 3.0,
       "kind": "stair",
       "step_free": false
     },
     {
-      "id": "SP-FNB",
+      "id": "SP-FNB-N",
       "u": "C1",
-      "v": "FNB",
+      "v": "FNB-N",
+      "length_m": 17.9,
+      "width_m": 3.0,
+      "kind": "corridor",
+      "step_free": true
+    },
+    {
+      "id": "SP-FNB-S",
+      "u": "C5",
+      "v": "FNB-S",
       "length_m": 17.9,
       "width_m": 3.0,
       "kind": "corridor",
@@ -634,6 +763,69 @@
       "u": "C7",
       "v": "CONTROL",
       "length_m": 18.9,
+      "width_m": 3.0,
+      "kind": "corridor",
+      "step_free": true
+    },
+    {
+      "id": "SP-MERCH",
+      "u": "C3",
+      "v": "MERCH",
+      "length_m": 18.9,
+      "width_m": 3.0,
+      "kind": "corridor",
+      "step_free": true
+    },
+    {
+      "id": "SP-LOUNGE",
+      "u": "C1",
+      "v": "LOUNGE",
+      "length_m": 20.9,
+      "width_m": 3.0,
+      "kind": "corridor",
+      "step_free": true
+    },
+    {
+      "id": "SP-ATM",
+      "u": "C7",
+      "v": "ATM",
+      "length_m": 15.6,
+      "width_m": 3.0,
+      "kind": "corridor",
+      "step_free": true
+    },
+    {
+      "id": "SP-WATER",
+      "u": "C5",
+      "v": "WATER",
+      "length_m": 12.8,
+      "width_m": 3.0,
+      "kind": "corridor",
+      "step_free": true
+    },
+    {
+      "id": "SP-CHARGE",
+      "u": "C3",
+      "v": "CHARGE",
+      "length_m": 15.6,
+      "width_m": 3.0,
+      "kind": "corridor",
+      "step_free": true
+    },
+    {
+      "id": "SP-FAMILY",
+      "u": "C1",
+      "v": "FAMILY",
+      "length_m": 20.4,
+      "width_m": 3.0,
+      "kind": "corridor",
+      "step_free": true
+    },
+    {
+      "id": "SP-QUIET",
+      "u": "C7",
+      "v": "QUIET",
+      "length_m": 17.0,
       "width_m": 3.0,
       "kind": "corridor",
       "step_free": true

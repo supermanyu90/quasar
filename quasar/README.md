@@ -73,8 +73,11 @@ src/quasar/
   scenarios.py    synthetic scenario generation + the pre-match stress harness
   venue_spec.py   loads + validates a venue from JSON (schema + referential integrity)
   readiness.py    can this venue open? language + accessibility + topology audit
+  amenities.py    the attendee amenity catalogue (icons, tags, calm-route rule)
   web.py          the venue-aware control-room adapter
   venue_factory.py  parametric representative graphs from real venue metadata
 tools/
   gen_fifa_venues.py   regenerate the 16 FIFA venue specs (deterministic)
+  (venue specs now carry food/restroom/merch/lounge/water/charging/family/quiet
+   amenity nodes; the Attendee tab routes to them, crowd-aware and step-free)
 ```

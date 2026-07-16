@@ -452,3 +452,39 @@ blockquote {
 footer { padding: 1.6rem 2rem 3rem; color: var(--dim); font-size: .86rem; max-width: 74ch; }
 
 .spin { color: var(--dim); font-size: .88rem; }
+
+/* ── attendee companion ────────────────────────────── */
+.fan-controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: .6rem; }
+.fan-controls label { margin-bottom: 0; }
+.fan-toggles { display: flex; flex-wrap: wrap; gap: 1rem; margin: .8rem 0 .3rem; }
+.fan-toggles .check { margin: 0; font-weight: 600; color: var(--text); }
+
+.amenity-group { margin-top: 1rem; }
+.amenity-group h4 { margin: 0 0 .5rem; font-size: .74rem; text-transform: uppercase; letter-spacing: .07em; color: var(--dim); font-weight: 800; }
+.amenity-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: .55rem; }
+.amenity-btn {
+  display: flex; flex-direction: column; align-items: center; gap: .3rem;
+  padding: .8rem .5rem; border-radius: 18px; border: 2px solid var(--line);
+  background: var(--panel); box-shadow: var(--shadow-sm);
+  font-size: .8rem; font-weight: 650; text-align: center; line-height: 1.25;
+  cursor: pointer;
+  transition: transform .16s var(--spring), box-shadow .18s, border-color .18s, background .18s;
+}
+.amenity-btn .ico { font-size: 1.7rem; line-height: 1; }
+.amenity-btn:hover:not(:disabled) { transform: translateY(-3px) scale(1.03); box-shadow: var(--shadow-md); border-color: var(--ca, var(--accent)); }
+.amenity-btn:active:not(:disabled) { transform: scale(.95); }
+.amenity-btn:disabled { opacity: .38; cursor: not-allowed; }
+.amenity-btn.on { border-color: var(--accent); background: var(--accent-soft); }
+
+.wayfind-card {
+  margin-top: 1rem; padding: 1rem 1.1rem; border-radius: 18px;
+  background: var(--panel-2); border: 2px solid var(--line);
+  border-left: 5px solid var(--accent);
+  animation: pop .3s var(--spring) both;
+}
+.wayfind-card .big { font-size: 1.15rem; font-weight: 800; display: flex; align-items: center; gap: .5rem; }
+.wayfind-card .big .ico { font-size: 1.6rem; }
+.wayfind-card .msg { margin-top: .3rem; font-size: .95rem; }
+.wayfind-card .info { margin-top: .5rem; font-size: .82rem; color: var(--dim); }
+.wayfind-card .steps { margin-top: .55rem; font-size: .78rem; color: var(--dim); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+.wayfind-card.miss { border-left-color: var(--warn); }

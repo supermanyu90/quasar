@@ -461,6 +461,9 @@ SCHEMAS: Mapping[str, Mapping[str, Any]] = {
                         "level": {"type": "integer", "minimum": -5, "maximum": 20},
                         "zone": _ID,
                         "tags": {"type": "array", "maxItems": 12, "items": {"type": "string"}},
+                        # Attendee-facing detail for an amenity: hours, cashless,
+                        # dietary, etc. Informational only -- never a safety field.
+                        "info": {"type": "string", "maxLength": 120},
                     },
                 },
             },

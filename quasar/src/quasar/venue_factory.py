@@ -176,22 +176,41 @@ def generate_spec(meta: Mapping[str, Any]) -> dict[str, Any]:
     c_north = nearest_concourse(0, b_in)
     c_south = nearest_concourse(0, -b_in)
 
-    def spur(nid, name, tags, anchor, dx, dy, kind="corridor", step_free=True):
+    def spur(nid, name, tags, anchor, dx, dy, kind="corridor", step_free=True, info=None):
         ax, ay = conc_pos[anchor]
         node(nid, name, ax + dx, ay + dy, 1, nodes_zone(anchor), tags)
+        if info:
+            nodes[-1]["info"] = info
         edge(f"SP-{nid}", anchor, nid, max(12.0, dist(ax, ay, ax + dx, ay + dy)),
              3.0, kind, step_free)
 
     def nodes_zone(cid):
         return next(n["zone"] for n in nodes if n["id"] == cid)
 
-    spur("WC-ACC", "Accessible Washroom", ["washroom", "accessible"], c_north, -14, 6)
-    spur("WC", "Washroom", ["washroom"], c_south, 14, -6, kind="stair", step_free=False)
-    spur("FNB", "Food Court", ["fnb"], c_north, 16, 8)
-    spur("LOST", "Lost & Found", ["lost_and_found"], c_south, -16, -8)
-    spur("MED-1", "Medical Post (East)", ["medical"], c_east, 18, 4)
-    spur("MED-2", "Medical Post (West)", ["medical"], c_west, -18, -4)
+    # Amenities the attendee companion can route to. Spread around the ring so the
+    # "nearest one" actually differs by where the fan is standing. Accessible spurs
+    # are step-free; the plain washroom is up a stair, so the accessible-restroom
+    # request genuinely resolves to a different, reachable node.
+    spur("WC-N-ACC", "North Accessible Restroom", ["washroom", "accessible"], c_north, -14, 6)
+    spur("WC-S-ACC", "South Accessible Restroom", ["washroom", "accessible"], c_south, 14, -6)
+    spur("WC-E", "East Restroom", ["washroom"], c_east, 12, -8, kind="stair", step_free=False)
+    spur("FNB-N", "North Food Court", ["fnb"], c_north, 16, 8, info="Cashless · veg & halal options")
+    spur("FNB-S", "South Kiosks", ["fnb"], c_south, -16, 8, info="Cashless · snacks & drinks")
+    spur("LOST", "Lost & Found", ["lost_and_found"], c_south, -16, -8, info="Open all match")
+    spur("MED-1", "First Aid (East)", ["medical"], c_east, 18, 4, info="Staffed paramedics")
+    spur("MED-2", "First Aid (West)", ["medical"], c_west, -18, -4, info="Staffed paramedics")
     spur("CONTROL", "Command Centre", ["control"], c_west, -16, 10)
+
+    # Retail & comfort
+    spur("MERCH", "Team Store", ["merch"], c_east, 16, -10, info="Official kit & souvenirs")
+    spur("LOUNGE", "Members' Lounge", ["lounge"], c_north, 20, -6, info="Seating, bar, step-free")
+    spur("ATM", "Cash Machine", ["atm"], c_west, 12, 10)
+    # Practical
+    spur("WATER", "Water Refill", ["water"], c_south, 8, 10, info="Free · bring a bottle")
+    spur("CHARGE", "Charging Point", ["charging"], c_east, 10, 12, info="USB-A / USB-C")
+    spur("FAMILY", "Family & Baby Care", ["family"], c_north, -20, -4, info="Changing, feeding, quiet")
+    # Inclusive
+    spur("QUIET", "Quiet / Prayer Room", ["quiet"], c_west, -12, -12, info="Low light, low noise")
 
     # Service ring: a staff-only bypass so responders reach the far side of a
     # cordon without threading the crowd. Level 0, beneath the bowl.

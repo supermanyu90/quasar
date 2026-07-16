@@ -76,6 +76,7 @@ class Node:
     level: int
     zone: ZoneId
     tags: frozenset[str] = frozenset()
+    info: str = ""  # attendee-facing blurb for amenities; informational only
 
 
 @dataclass(frozen=True, slots=True)

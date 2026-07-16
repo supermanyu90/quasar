@@ -143,6 +143,7 @@ def load_spec(spec: Mapping[str, Any]) -> VenueProfile:
         nodes[n["id"]] = Node(
             id=n["id"], name=n["name"], x=float(n["x"]), y=float(n["y"]),
             level=int(n["level"]), zone=n["zone"], tags=frozenset(n["tags"]),
+            info=n.get("info", ""),
         )
 
     zones = set(spec["zones"])

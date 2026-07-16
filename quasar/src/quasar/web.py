@@ -571,6 +571,161 @@ def concierge(
     }
 
 
+# ==========================================================================
+# Attendee companion — deterministic wayfinding to amenities
+# ==========================================================================
+
+import dataclasses  # noqa: E402
+
+from quasar.amenities import AMENITIES, BY_KEY, CALM_MAX_DENSITY, GROUPS  # noqa: E402
+from quasar.routing import Profile  # noqa: E402
+
+# A short lead-in per language, so a button result greets the fan in their own
+# tongue. The amenity names stay as signage reads; the numbers are universal. The
+# free-text concierge (the model path) still handles anything richer.
+_LEAD: Mapping[str, str] = {
+    "en": "Here’s your route to",
+    "es": "Aquí tienes tu ruta a",
+    "fr": "Voici votre itinéraire vers",
+    "hi": "यहाँ आपका मार्ग है:",
+    "mr": "हा तुमचा मार्ग आहे:",
+    "ta": "இதோ உங்கள் வழி:",
+}
+
+
+def _fan_profile(accessible: bool, calm: bool) -> Profile:
+    base = ACCESSIBLE if accessible else FAN
+    if calm:
+        # A sensory-calmer walk: hold below Fruin LOS D. Keeps step-free if asked.
+        return dataclasses.replace(
+            base, name=f"{base.name}+calm", max_density=CALM_MAX_DENSITY
+        )
+    return base
+
+
+def _matching_nodes(venue_id: str, tags: Sequence[str]) -> list[str]:
+    ts = set(tags)
+    return [n.id for n in profile(venue_id).venue.nodes.values() if ts <= n.tags]
+
+
+def amenities_json(venue_id: str) -> dict[str, Any]:
+    """The amenity catalogue, flagged with what this venue actually has mapped."""
+    p = profile(venue_id)
+    items = []
+    for a in AMENITIES:
+        available = True
+        if a.kind == "tag":
+            available = bool(_matching_nodes(venue_id, a.tags))
+        elif a.kind == "seat":
+            available = bool(p.venue.nodes_tagged("seating"))
+        items.append({
+            "key": a.key, "icon": a.icon, "label": a.label,
+            "group": a.group, "kind": a.kind, "available": available,
+        })
+    return {
+        "venue": venue_id,
+        "groups": [{"key": k, "label": l} for k, l in GROUPS],
+        "amenities": items,
+    }
+
+
+def wayfind(
+    venue_id: str,
+    from_node: str,
+    amenity_key: str,
+    *,
+    accessible: bool = False,
+    calm: bool = False,
+    language: str = "en",
+    seat: str | None = None,
+    cordoned: Sequence[str] = (),
+) -> dict[str, Any]:
+    """Route an attendee to an amenity. Pure deterministic plane — no model.
+
+    This is the friendly face of the same router the control room uses: the route
+    it returns is crowd-aware (it avoids corridors above the profile's density
+    limit) and, when asked, step-free and calm. A fan and a commander are served by
+    the identical geometry; only the framing differs.
+    """
+    p, snap, a = assessment(venue_id)
+    plane = _plane(venue_id)
+    am = BY_KEY.get(amenity_key)
+    if am is None:
+        raise ValueError(f"unknown amenity {amenity_key!r}")
+    if from_node not in p.venue.nodes:
+        raise ValueError(f"unknown location {from_node!r}")
+
+    base = {"amenity": am.key, "icon": am.icon, "label": am.label}
+
+    if am.kind == "assist":
+        # A request, not a destination. Acknowledge honestly; in a real deployment
+        # this notifies stewarding rather than routing to a fixed point.
+        return {
+            **base, "request": True, "route": None, "destination": None,
+            "message": (
+                f"Assistance is on its way to you at {p.venue.node(from_node).name}. "
+                "A steward has been notified."
+            ),
+        }
+
+    if am.kind == "seat":
+        candidates = [seat or p.fixture.fan_seat]
+    else:
+        candidates = _matching_nodes(venue_id, am.tags)
+
+    if not candidates:
+        return {
+            **base, "found": False, "route": None, "destination": None,
+            "message": f"No {am.label.lower()} is mapped at this venue yet.",
+        }
+
+    prof = _fan_profile(accessible, calm)
+    cordon = frozenset(cordoned)
+    best: Route | None = None
+    reachable = 0
+    for cid in candidates:
+        try:
+            r = plane.fan_route(a, from_node=from_node, to_node=cid, profile=prof, cordoned=cordon)
+        except NoRouteError:
+            continue
+        reachable += 1
+        if best is None or r.eta_s < best.eta_s:
+            best = r
+
+    if best is None:
+        # Every candidate exists but none is reachable under the fan's constraints
+        # (e.g. an accessible route is demanded and only stepped ones exist). The
+        # router refuses rather than sending them somewhere unsafe.
+        why = "step-free " if accessible else ""
+        return {
+            **base, "found": True, "route": None, "destination": None,
+            "message": (
+                f"No {why}route to a {am.label.lower()} is open from here right now. "
+                "Ask the nearest steward for help."
+            ),
+        }
+
+    dest = p.venue.node(best.destination)
+    lead = _LEAD.get(language, _LEAD["en"])
+    extras = []
+    if accessible:
+        extras.append("step-free")
+    if calm:
+        extras.append("calm")
+    tail = f" ({', '.join(extras)})" if extras else ""
+    return {
+        **base,
+        "found": True,
+        "route": route_json(best),
+        "destination": {"id": dest.id, "name": dest.name, "info": dest.info, "zone": dest.zone},
+        "alternatives": max(0, reachable - 1),
+        "message": (
+            f"{lead} {dest.name} — {round(best.distance_m)} m, about "
+            f"{max(1, round(best.eta_s / 60))} min{tail}."
+        ),
+    }
+
+
 def stress(venue_id: str, kind: str, n: int = 3) -> dict[str, Any]:
     p = profile(venue_id)
     det = _plane(venue_id)
