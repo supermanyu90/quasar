@@ -1,0 +1,9 @@
+# The deterministic plane, the governance barrier, the schema validator, the
+# BM25 retriever and the whole test suite require NOTHING from this file.
+# They run on a stock Python 3.12+ interpreter, offline, on a venue box that has
+# never seen the internet. That is a safety property, not a packaging preference.
+#
+# This file's real job on Vercel is to signal "this is a Python project" so the
+# runtime builds api/index.py as the function entrypoint. The one dependency below
+# is imported lazily and needed only to talk to a real cloud model (live mode).
+anthropic>=0.40.0

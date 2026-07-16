@@ -20,3 +20,5 @@ env/
 *.swp
 .idea/
 .vscode/
+.vercel
+.env*

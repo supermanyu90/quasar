@@ -1,21 +1,18 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "outputDirectory": "public",
-  "functions": {
-    "api/*.py": {
-      "includeFiles": "{src/**,venues/**}",
-      "maxDuration": 60,
-      "memory": 512
-    }
-  },
-  "headers": [
+  "builds": [
     {
-      "source": "/api/(.*)",
-      "headers": [{ "key": "cache-control", "value": "no-store" }]
+      "src": "api/index.py",
+      "use": "@vercel/python",
+      "config": { "includeFiles": "{src/**,venues/**}", "maxLambdaSize": "50mb" }
     },
-    {
-      "source": "/(index.html|app.js|styles.css)?",
-      "headers": [{ "key": "cache-control", "value": "no-store, must-revalidate" }]
-    }
+    { "src": "public/**", "use": "@vercel/static" }
+  ],
+  "routes": [
+    { "src": "/api/(.+)", "dest": "/api?endpoint=$1", "headers": { "cache-control": "no-store" } },
+    { "src": "/", "dest": "/public/index.html", "headers": { "cache-control": "no-store, must-revalidate" } },
+    { "src": "/(app\\.js|styles\\.css)", "dest": "/public/$1", "headers": { "cache-control": "no-store, must-revalidate" } },
+    { "handle": "filesystem" },
+    { "src": "/(.*)", "dest": "/public/$1" }
   ]
 }
