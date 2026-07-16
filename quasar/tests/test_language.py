@@ -16,9 +16,9 @@ from quasar.language import (
     normalise_digits,
     translate_informational,
 )
-from quasar.venue import build_stadium
+from quasar.venue_spec import reference_venue
 
-VENUE = build_stadium()
+VENUE = reference_venue()
 
 
 def catalogue() -> MessageCatalogue:

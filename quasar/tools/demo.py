@@ -28,7 +28,7 @@ from quasar.llm import FailoverModel, ModelUnavailable, OllamaEdgeModel, Transcr
 from quasar.plane import DeterministicPlane
 from quasar.routing import RESPONDER
 from quasar.scenarios import SeededSampler, StressHarness
-from quasar.venue import build_stadium
+from quasar.venue_spec import reference_venue
 
 from tests.fixtures import (  # the recorded transcripts live with the tests
     BRIEF_TRANSCRIPT,
@@ -69,7 +69,7 @@ def main() -> int:
     args = parser.parse_args()
     mode = "partition" if args.partition else "live" if args.live else "recorded"
 
-    venue = build_stadium()
+    venue = reference_venue()
     plane = DeterministicPlane(venue)
     audit = AuditLog()
     orch = Orchestrator(plane, build_model(mode), audit=audit)

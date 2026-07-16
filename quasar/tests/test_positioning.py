@@ -11,7 +11,7 @@ from quasar.positioning import (
     expected_rssi,
     simulate_readings,
 )
-from quasar.venue import build_stadium
+from quasar.venue_spec import reference_venue
 
 
 class TestPathLoss(unittest.TestCase):
@@ -28,7 +28,7 @@ class TestPathLoss(unittest.TestCase):
 
 class TestFilter(unittest.TestCase):
     def setUp(self) -> None:
-        self.venue = build_stadium()
+        self.venue = reference_venue()
 
     def test_it_converges_on_a_walk_with_no_prior(self) -> None:
         """Seeded uniformly over the whole venue -- the filter does not know where

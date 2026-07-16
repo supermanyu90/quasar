@@ -26,12 +26,14 @@ budget.
 
 from __future__ import annotations
 
+import dataclasses
 import os
 from dataclasses import dataclass
 from functools import lru_cache
 from typing import Any, Literal, Mapping, Sequence
 
 from quasar import demo_data
+from quasar.amenities import AMENITIES, BY_KEY, CALM_MAX_DENSITY, GROUPS
 from quasar.agents import (
     ConciergeAgent,
     ConciergeTask,
@@ -54,7 +56,7 @@ from quasar.llm import (
 )
 from quasar.plane import Assessment, DeterministicPlane
 from quasar.readiness import audit
-from quasar.routing import ACCESSIBLE, FAN, NoRouteError, Route
+from quasar.routing import ACCESSIBLE, FAN, NoRouteError, Profile, Route
 from quasar.scenarios import SeededSampler, StressHarness
 from quasar.types import TelemetrySnapshot
 from quasar.venue_spec import VenueProfile, discover
@@ -574,11 +576,6 @@ def concierge(
 # ==========================================================================
 # Attendee companion — deterministic wayfinding to amenities
 # ==========================================================================
-
-import dataclasses  # noqa: E402
-
-from quasar.amenities import AMENITIES, BY_KEY, CALM_MAX_DENSITY, GROUPS  # noqa: E402
-from quasar.routing import Profile  # noqa: E402
 
 # A short lead-in per language, so a button result greets the fan in their own
 # tongue. The amenity names stay as signage reads; the numbers are universal. The

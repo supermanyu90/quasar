@@ -15,12 +15,12 @@ from quasar.routing import (
     RouteRequest,
     Router,
 )
-from quasar.venue import build_stadium
+from quasar.venue_spec import reference_venue
 
 
 class RoutingCase(unittest.TestCase):
     def setUp(self) -> None:
-        self.venue = build_stadium()
+        self.venue = reference_venue()
         self.router = Router(self.venue)
         self.quiet = {e: 0.3 for e in self.venue.edges}
         # The north-east pinch point in a crush; the north concourse busy.

@@ -31,9 +31,9 @@ from quasar.demo_data import (  # noqa: F401  (re-exported for the test modules)
 from quasar.llm import DisabledModel, ModelRequest, ModelResponse, ModelUnavailable
 from quasar.plane import DeterministicPlane
 from quasar.types import TelemetrySnapshot
-from quasar.venue import build_stadium
+from quasar.venue_spec import reference_venue
 
-VENUE = build_stadium()
+VENUE = reference_venue()
 
 
 def zone_of(node_id: str) -> str:

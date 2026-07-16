@@ -44,7 +44,7 @@ from quasar.types import (
     Role,
     TelemetrySnapshot,
 )
-from quasar.venue import Venue, _build_adjacency
+from quasar.venue import Venue, build_adjacency
 
 
 class VenueSpecError(Exception):
@@ -181,7 +181,7 @@ def load_spec(spec: Mapping[str, Any]) -> VenueProfile:
         nodes=nodes,
         edges=edges,
         beacons=beacons,
-        _adjacency=_build_adjacency(nodes, edges),
+        _adjacency=build_adjacency(nodes, edges),
     )
 
     _assert_connected(venue)
@@ -283,6 +283,24 @@ def load_file(path: Path) -> VenueProfile:
 
 
 VENUES_DIR = Path(__file__).resolve().parent.parent.parent / "venues"
+
+# The id of the hand-authored reference stadium, used by tests and the CLI demo.
+REFERENCE_VENUE_ID = "national-stadium"
+
+
+def reference_venue() -> Venue:
+    """The hand-authored reference stadium, loaded from its spec.
+
+    There is one definition of it -- ``venues/national-stadium.json`` -- and this is
+    how the tests and the CLI demo reach it. It used to be a second, hardcoded copy
+    in :mod:`quasar.venue`; that copy drifted from the spec (it never grew the
+    amenity nodes the spec has), which is exactly why a single source matters.
+    """
+    return reference_profile().venue
+
+
+def reference_profile() -> VenueProfile:
+    return load_file(VENUES_DIR / f"{REFERENCE_VENUE_ID}.json")
 
 
 def discover(directory: Path | None = None) -> dict[str, VenueProfile]:

@@ -213,17 +213,30 @@ class StressHarness:
         return self._installed.get(gate_id, self._default_installed)
 
     def run(self, scenario: Mapping[str, Any]) -> StressResult:
+        """Apply a scenario and check every invariant. Reads as its checklist."""
         schemas.validate(scenario, schemas.SCENARIO)
-        plane = self._plane
-        venue = plane.venue
-
+        snapshot = self._snapshot(scenario)
+        assessment = self._plane.assess(snapshot)
         closed = frozenset(scenario["closed_edges"])
-        density: dict[EdgeId, float] = {
-            e: float(scenario["edge_density"].get(e, 0.0)) for e in venue.edges
-        }
-        snapshot = TelemetrySnapshot(
+        density = dict(snapshot.edge_density)
+
+        findings: list[Finding] = []
+        for seat in self._plane.venue.nodes_tagged("seating"):
+            findings += self._check_seat_egress(seat, closed, density)
+        findings += self._check_gate_mitigation(assessment, snapshot)
+        findings += self._check_single_point_corridors(assessment, closed, density)
+
+        return StressResult(
+            scenario_id=scenario["scenario_id"],
+            kind=scenario["kind"],
+            findings=tuple(findings),
+        )
+
+    def _snapshot(self, scenario: Mapping[str, Any]) -> TelemetrySnapshot:
+        venue = self._plane.venue
+        return TelemetrySnapshot(
             t=0.0,
-            edge_density=density,
+            edge_density={e: float(scenario["edge_density"].get(e, 0.0)) for e in venue.edges},
             gates={
                 o["gate_id"]: GateTelemetry(
                     gate_id=o["gate_id"],
@@ -235,96 +248,86 @@ class StressHarness:
                 for o in scenario["gate_overrides"]
             },
         )
-        assessment = plane.assess(snapshot)
+
+    def _check_seat_egress(
+        self, seat: Any, closed: frozenset[EdgeId], density: Mapping[EdgeId, float]
+    ) -> list[Finding]:
+        """Can this stand get out -- on foot, and step-free?"""
+        plane = self._plane
+        gates = plane.venue.nodes_tagged("gate")
         findings: list[Finding] = []
 
-        seats = venue.nodes_tagged("seating")
-        gates = venue.nodes_tagged("gate")
-
-        for seat in seats:
-            # I1/I2 -- an ambulatory spectator can still reach some gate, and the
-            # route they are given never crosses a closed corridor.
-            best = None
-            for gate in gates:
-                try:
-                    route = plane.router.route(
-                        RouteRequest(
-                            origin=seat.id,
-                            destination=gate.id,
-                            profile=FAN,
-                            cordoned_edges=closed,
-                        ),
-                        density,
-                    )
-                except NoRouteError:
-                    continue
-                if any(e in closed for e in route.edges):
-                    findings.append(Finding(
-                        "no-route-through-closure", "critical",
-                        f"{seat.id} -> {gate.id} was routed through a closed corridor",
-                    ))
-                if best is None or route.eta_s < best.eta_s:
-                    best = route
-
-            if best is None:
+        # I1/I2 -- an ambulatory spectator reaches some gate, by a route that never
+        # crosses a closed corridor, within the eight-minute ceiling.
+        best = None
+        for gate in gates:
+            try:
+                route = plane.router.route(
+                    RouteRequest(seat.id, gate.id, FAN, cordoned_edges=closed), density
+                )
+            except NoRouteError:
+                continue
+            if any(e in closed for e in route.edges):
                 findings.append(Finding(
-                    "egress-exists", "critical",
-                    f"{seat.id} has no route to any gate under this scenario",
+                    "no-route-through-closure", "critical",
+                    f"{seat.id} -> {gate.id} was routed through a closed corridor",
                 ))
-            elif best.eta_s > MAX_EGRESS_S:
-                findings.append(Finding(
-                    "egress-time", "major",
-                    f"{seat.id} egress is {best.eta_s / 60:.1f} min to {best.destination}, "
-                    f"above the {MAX_EGRESS_S / 60:.0f} min ceiling (SOP-EVAC-01#2)",
-                ))
+            if best is None or route.eta_s < best.eta_s:
+                best = route
 
-            # I3 -- and so can a spectator who cannot use stairs.
-            #
-            # Three very different failures hide behind "no step-free route", and
-            # conflating them makes the finding useless, because each one has a
-            # different remedy and a different owner:
-            #
-            #   * none in an empty venue with nothing closed -> the BUILDING is
-            #     wrong. No amount of crowd management fixes it; staff a refuge
-            #     point. This is an architect's problem, found before the season.
-            #   * exists normally, but this scenario's CLOSURES remove the last
-            #     one -> the closure plan is wrong. Do not apply that closure
-            #     without first standing up a refuge. An operations problem.
-            #   * exists, is open, but is too CROWDED for an assisted-mobility
-            #     profile -> hold the accessible route clear. A stewarding problem,
-            #     solvable tonight, in minutes.
-            #
-            # Reporting all three as "no step-free egress" would send the wrong
-            # person to fix the wrong thing.
-            empty = self._empty(venue)
-            baseline = self._step_free_route(seat.id, gates, empty, frozenset())
-            after_closure = self._step_free_route(seat.id, gates, empty, closed)
-            under_load = self._step_free_route(seat.id, gates, density, closed)
+        if best is None:
+            findings.append(Finding(
+                "egress-exists", "critical",
+                f"{seat.id} has no route to any gate under this scenario",
+            ))
+        elif best.eta_s > MAX_EGRESS_S:
+            findings.append(Finding(
+                "egress-time", "major",
+                f"{seat.id} egress is {best.eta_s / 60:.1f} min to {best.destination}, "
+                f"above the {MAX_EGRESS_S / 60:.0f} min ceiling (SOP-EVAC-01#2)",
+            ))
 
-            if baseline is None:
-                findings.append(Finding(
-                    "step-free-egress-exists", "critical",
-                    f"{seat.id} has no step-free route to any gate in an empty, fully open "
-                    "venue. This is a defect in the building, not the crowd: a staffed "
-                    "refuge point is mandatory here before the fixture (SOP-EVAC-01#3)",
-                ))
-            elif after_closure is None:
-                findings.append(Finding(
-                    "step-free-egress-after-closure", "critical",
-                    f"{seat.id} normally has a step-free route to {baseline.destination}, "
-                    f"but this scenario's closures ({', '.join(sorted(closed))}) remove "
-                    "every one. That closure may not be applied without standing up a "
-                    "refuge point first (SOP-EVAC-01#3)",
-                ))
-            elif under_load is None:
-                findings.append(Finding(
-                    "step-free-egress-under-load", "major",
-                    f"{seat.id} has a step-free route ({after_closure.destination}) but every "
-                    "such route is above the assisted-mobility density limit under this "
-                    "scenario; the accessible route must be held clear",
-                ))
+        # I3 -- and so can a spectator who cannot use stairs. Three very different
+        # failures hide behind "no step-free route", and each has a different remedy
+        # and a different owner, so we distinguish them rather than send the wrong
+        # person to fix the wrong thing:
+        #   * none in an empty, fully-open venue -> the BUILDING is wrong (architect);
+        #   * exists normally but this scenario's CLOSURES remove it -> the closure
+        #     plan is wrong (operations);
+        #   * exists and open but too CROWDED for assisted mobility -> hold the route
+        #     clear (stewarding, solvable tonight).
+        empty = self._empty(plane.venue)
+        baseline = self._step_free_route(seat.id, gates, empty, frozenset())
+        after_closure = self._step_free_route(seat.id, gates, empty, closed)
+        under_load = self._step_free_route(seat.id, gates, density, closed)
 
-        # I4 -- every saturated gate has a mitigation within its installed lanes.
+        if baseline is None:
+            findings.append(Finding(
+                "step-free-egress-exists", "critical",
+                f"{seat.id} has no step-free route to any gate in an empty, fully open "
+                "venue. This is a defect in the building, not the crowd: a staffed "
+                "refuge point is mandatory here before the fixture (SOP-EVAC-01#3)",
+            ))
+        elif after_closure is None:
+            findings.append(Finding(
+                "step-free-egress-after-closure", "critical",
+                f"{seat.id} normally has a step-free route to {baseline.destination}, "
+                f"but this scenario's closures ({', '.join(sorted(closed))}) remove "
+                "every one. That closure may not be applied without standing up a "
+                "refuge point first (SOP-EVAC-01#3)",
+            ))
+        elif under_load is None:
+            findings.append(Finding(
+                "step-free-egress-under-load", "major",
+                f"{seat.id} has a step-free route ({after_closure.destination}) but every "
+                "such route is above the assisted-mobility density limit under this "
+                "scenario; the accessible route must be held clear",
+            ))
+        return findings
+
+    def _check_gate_mitigation(self, assessment: Any, snapshot: TelemetrySnapshot) -> list[Finding]:
+        """I4 -- every saturated gate has a mitigation within its installed lanes."""
+        findings: list[Finding] = []
         for gid, metrics in assessment.gates.items():
             if not metrics.breaches_trigger:
                 continue
@@ -344,14 +347,20 @@ class StressHarness:
                     f"{gid} needs {needed} lanes to hold the 0.90 trigger but only "
                     f"{telemetry.installed_lanes} are installed; a diversion is mandatory",
                 ))
+        return findings
 
-        # I5 -- a corridor at LOS F with no parallel path is a single point of failure.
-        #
-        # Spurs to dead ends (the VIP box, lost property, a gate) are excluded:
-        # "the only path to a cul-de-sac is the only path to a cul-de-sac" is a
-        # tautology, not a finding, and a harness that reports tautologies stops
-        # being read. What matters is severing the *ring* -- disconnecting one part
-        # of the concourse from another.
+    def _check_single_point_corridors(
+        self, assessment: Any, closed: frozenset[EdgeId], density: Mapping[EdgeId, float]
+    ) -> list[Finding]:
+        """I5 -- a LOS-F corridor with no parallel path is a single point of failure.
+
+        Spurs to dead ends (the VIP box, lost property, a gate) are excluded: "the
+        only path to a cul-de-sac is the only path to a cul-de-sac" is a tautology,
+        not a finding, and a harness that reports tautologies stops being read. What
+        matters is severing the *ring* -- disconnecting one part of the concourse.
+        """
+        venue = self._plane.venue
+        findings: list[Finding] = []
         for edge_id in assessment.critical_edges:
             if edge_id in closed:
                 continue
@@ -359,13 +368,8 @@ class StressHarness:
             if self._is_spur(edge.u) or self._is_spur(edge.v):
                 continue
             try:
-                plane.router.route(
-                    RouteRequest(
-                        origin=edge.u,
-                        destination=edge.v,
-                        profile=FAN,
-                        cordoned_edges=closed | {edge_id},
-                    ),
+                self._plane.router.route(
+                    RouteRequest(edge.u, edge.v, FAN, cordoned_edges=closed | {edge_id}),
                     density,
                 )
             except NoRouteError:
@@ -374,12 +378,7 @@ class StressHarness:
                     f"{edge_id} is at LOS F and is the only spectator path between "
                     f"{edge.u} and {edge.v}; cordoning it severs the concourse",
                 ))
-
-        return StressResult(
-            scenario_id=scenario["scenario_id"],
-            kind=scenario["kind"],
-            findings=tuple(findings),
-        )
+        return findings
 
     # -- helpers ----------------------------------------------------------
 
