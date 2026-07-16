@@ -3,7 +3,7 @@
   "outputDirectory": "public",
   "functions": {
     "api/*.py": {
-      "includeFiles": "src/**",
+      "includeFiles": "{src/**,venues/**}",
       "maxDuration": 60,
       "memory": 512
     }
