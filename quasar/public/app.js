@@ -826,11 +826,55 @@ function wireTabs() {
   for (const tab of document.querySelectorAll('.tab')) {
     tab.onclick = () => {
       document.querySelectorAll('.tab').forEach((t) => t.classList.toggle('active', t === tab));
-      for (const id of ['control', 'fan', 'ready', 'premat', 'audit']) {
+      for (const id of ['guide', 'control', 'fan', 'ready', 'premat', 'audit']) {
         $('tab-' + id).hidden = id !== tab.dataset.tab;
       }
     };
   }
+}
+
+async function renderGuide() {
+  // The guide is the problem statement mapped to the console. Each item ends in a
+  // deep link into the feature that proves it, so nothing here is a claim you have
+  // to take on trust — the button walks you to where you can watch it hold.
+  const guide = await api('guide');
+  $('guide-challenge').textContent = guide.challenge;
+  $('guide-thesis').textContent = guide.thesis;
+
+  const host = $('guide-sections');
+  host.replaceChildren();
+  for (const section of guide.sections) {
+    const group = el('section', 'guide-group');
+    group.appendChild(el('h3', 'guide-heading', section.heading));
+    for (const it of section.items) {
+      const card = el('article', 'card');
+      const h = el('h2');
+      h.appendChild(el('span', 'gi', it.icon));
+      h.appendChild(document.createTextNode(' ' + it.title));
+      card.appendChild(h);
+      card.appendChild(el('p', 'sub', it.summary));
+      card.appendChild(el('p', null, it.how));
+
+      const mods = el('div', 'modules');
+      for (const m of it.modules) mods.appendChild(el('code', 'chip', m));
+      card.appendChild(mods);
+
+      const go = el('button', 'primary show-me', it.cta + ' →');
+      go.onclick = () => goTo(it.where);
+      card.appendChild(go);
+
+      group.appendChild(card);
+    }
+    host.appendChild(group);
+  }
+}
+
+function goTo(where) {
+  // Reuse the boot-time deep-link handling rather than re-implementing tab
+  // switching, venue loading and incident driving here: set the query and reload.
+  const url = new URL(location.href);
+  url.search = new URLSearchParams(where).toString();
+  location.assign(url.toString());
 }
 
 function wireMapView() {
@@ -860,6 +904,7 @@ async function boot() {
   wireTheme();
   wireTabs();
   wireMapView();
+  await renderGuide();
 
   $('mode').onchange = () => {
     const live = mode() === 'live';

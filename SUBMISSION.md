@@ -33,6 +33,48 @@ never computes a route, a capacity, or an evacuation time.
 
 ---
 
+## 1a. Problem-statement alignment & how to use
+
+> **Build a GenAI-enabled architecture that directly optimizes venue operations and
+> elevates the tournament experience for fans, organizers, volunteers, and on-ground
+> staff — covering dynamic crowd management, smart indoor navigation, real-time
+> decision support, and multi-language assistance.**
+
+The console opens on a **Guide** tab (🎯) that *is* this alignment, made
+interactive: every claim below ends in a button that deep-links to the exact place
+in the running system where you can watch it hold. The mapping is not prose baked
+into a page — it lives once, as structured data in `src/quasar/alignment.py`, is
+served at `/api/guide`, and is covered by `tests/test_alignment.py`, which fails if
+a track or persona loses its feature or a deep link points at a tab or venue that no
+longer exists. What follows is that same table, for readers of the document.
+
+**The four tracks → where the design meets each, and where to see it:**
+
+| Track | How Quasar meets it | See it (Guide → “show me”) |
+|---|---|---|
+| Dynamic crowd management | Weidmann/Fruin turn counts into level-of-service; M/M/c flags any gate past the 0.90 trigger; the system proposes lane reallocation/diversion; the pre-match harness fires generated failure scenarios before doors open. | Control room · run the incident |
+| Smart indoor navigation | Density-aware Dijkstra prices corridors by walking time; a step-free profile is a hard constraint; a graph-constrained particle filter answers “where am I”; the 3D view shows ramps against stairs. | Attendee · step-free route + 3D |
+| Real-time decision support | A RAG copilot cites the SOP clause; the brief and plan are corroborated against ground truth the model did not produce; no P0/P1 actuates without a commander’s signature. | Control room · the barrier |
+| Multi-language assistance | Two tiers: safety-critical messages come only from a human-validated catalogue (never machine-translated, with a gate-number-preservation check); informational help is generated behind quality gates. | Readiness · a Spanish/Tamil venue |
+
+**The four users → what the system does for each:**
+
+| Persona | Their need | Where |
+|---|---|---|
+| Fan / attendee | Find a restroom, seat or quiet room — step-free, calm-routed, in their language | Attendee tab |
+| Organizer / commander | Ground truth, a proposed plan, and the accountable final say | Control room · approve as commander |
+| Volunteer | A free-text radio report turned into a graded, SOP-cited brief | Control room · the report |
+| On-ground staff (medic / security) | A cordon-safe, density-aware route to a casualty | Control room · actuation |
+
+**Core objectives** — that GenAI is load-bearing not decorative (switch the model
+plane to *Partition* and watch what is lost), that a fluent-but-wrong model can
+never move the crowd alone (the hybrid safety architecture), that accessibility is a
+hard constraint, and that safety-critical geometry is never fabricated and passed
+off as surveyed — are each their own card in the Guide, with a deep link to the
+proof. See also §5 (persona journeys) and §7 (rubric alignment).
+
+---
+
 ## 2. Mathematical foundations
 
 ### 2.1 Crowd fluid dynamics

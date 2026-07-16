@@ -345,6 +345,35 @@ main {
 }
 .tag.danger { background: linear-gradient(135deg, var(--danger), #fb7185); }
 
+/* ── guide / how-to-use ──────────────────────────────── */
+.guide-lede .challenge { margin: .1rem 0 .7rem; font-size: 1.12rem; font-weight: 700; line-height: 1.5; color: var(--text); }
+.guide-lede .thesis { margin: 0 0 .9rem; font-size: .94rem; line-height: 1.55; color: var(--dim); }
+
+#guide-sections { display: flex; flex-direction: column; gap: 1.7rem; }
+.guide-group { display: flex; flex-direction: column; gap: 1.15rem; }
+.guide-heading {
+  display: flex; align-items: center; gap: .6rem;
+  margin: .5rem 0 -.15rem; font-size: 1.5rem; font-weight: 900; letter-spacing: -.02em;
+}
+.guide-heading::before {
+  content: ""; width: 26px; height: 6px; border-radius: 999px; flex: none;
+  background: linear-gradient(90deg, var(--c1), var(--c4));
+}
+
+.guide-group .card h2 { font-size: 1.28rem; }
+.guide-group .card h2::before { display: none; }   /* the emoji is the marker */
+.gi { font-size: 1.5rem; line-height: 1; }
+
+.modules { display: flex; flex-wrap: wrap; gap: .4rem; margin: .9rem 0 .2rem; }
+.chip {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .74rem;
+  padding: .18rem .52rem; border-radius: 999px;
+  background: color-mix(in srgb, var(--ca) 12%, var(--panel-2));
+  border: 1px solid color-mix(in srgb, var(--ca) 30%, var(--line));
+  color: color-mix(in srgb, var(--ca) 62%, var(--text));
+}
+.show-me { margin-top: 1rem; }
+
 label { display: block; margin-bottom: .7rem; font-size: .86rem; color: var(--dim); font-weight: 600; }
 label select, label textarea { margin-top: .32rem; width: 100%; }
 label.check { display: flex; align-items: center; gap: .5rem; }

@@ -32,7 +32,7 @@ from dataclasses import dataclass
 from functools import lru_cache
 from typing import Any, Literal, Mapping, Sequence
 
-from quasar import demo_data
+from quasar import alignment, demo_data
 from quasar.amenities import AMENITIES, BY_KEY, CALM_MAX_DENSITY, GROUPS
 from quasar.agents import (
     ConciergeAgent,
@@ -181,6 +181,31 @@ def orchestrator(
     return Orchestrator(
         _plane(venue_id), plane.model, catalogue=_catalogue(venue_id), audit=log
     )
+
+
+# ==========================================================================
+# Guide — problem-statement alignment
+# ==========================================================================
+
+
+def guide_json() -> dict[str, Any]:
+    """The 'How to use' guide: the challenge, the users, the objectives, each with
+    a live deep-link into the feature that proves it."""
+    def item(i: alignment.Item) -> dict[str, Any]:
+        return {
+            "key": i.key, "icon": i.icon, "title": i.title,
+            "summary": i.summary, "how": i.how, "cta": i.cta,
+            "where": dict(i.where), "modules": list(i.modules),
+        }
+
+    return {
+        "challenge": alignment.CHALLENGE,
+        "thesis": alignment.THESIS,
+        "sections": [
+            {"key": k, "heading": h, "items": [item(i) for i in items]}
+            for k, h, items in alignment.sections()
+        ],
+    }
 
 
 # ==========================================================================

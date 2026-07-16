@@ -37,7 +37,8 @@
 <p class="note" id="mode-note"></p>
 
 <nav class="tabs">
-  <button class="tab active" data-tab="control">🎛️ Control room</button>
+  <button class="tab active" data-tab="guide">🎯 Guide</button>
+  <button class="tab" data-tab="control">🎛️ Control room</button>
   <button class="tab" data-tab="fan">🎟️ Attendee</button>
   <button class="tab" data-tab="ready">✅ Readiness</button>
   <button class="tab" data-tab="premat">🧪 Pre-match</button>
@@ -82,8 +83,20 @@
     <p class="provenance" id="provenance" hidden></p>
   </section>
 
+  <!-- ─────────────────────────  guide  ────────────────────────── -->
+  <section class="panel" id="tab-guide">
+    <article class="card guide-lede">
+      <h2>What this is <span class="tag">how to use</span></h2>
+      <p class="challenge" id="guide-challenge"></p>
+      <p class="thesis" id="guide-thesis"></p>
+      <p class="sub">Everything below is a live link. Each claim ends with a button that
+        takes you to the exact place in this console where you can watch it hold.</p>
+    </article>
+    <div id="guide-sections"></div>
+  </section>
+
   <!-- ─────────────────────── control room ─────────────────────── -->
-  <section class="panel" id="tab-control">
+  <section class="panel" id="tab-control" hidden>
 
     <article class="card deterministic">
       <h2>1 · Deterministic plane <span class="tag">measured</span></h2>
