@@ -536,6 +536,51 @@ def actuate(
     }, orch.audit
 
 
+# Controlled, human-authored concierge acknowledgements. Same discipline as the
+# safety announcement catalogue: authored per language, never machine-translated,
+# and these phrases carry no entities to preserve. Safety-critical acknowledgements
+# come ONLY from here -- the model does not speak for safety. Informational ones
+# localise the deterministic fallback/transcript so a fan is greeted in their own
+# language even with no model reachable; a real model's free-text reply is left as
+# the model wrote it (it is never one of these fixed strings).
+_CONCIERGE_ACK: Mapping[str, Mapping[str, str]] = {
+    "safety_critical": {
+        "en": "A steward is on the way to you.",
+        "es": "Un acomodador va de camino hacia ti.",
+        "fr": "Un steward est en route vers vous.",
+        "hi": "एक कर्मचारी आपके पास आ रहा है।",
+        "mr": "एक कर्मचारी तुमच्याकडे येत आहे.",
+        "ta": "ஒரு ஊழியர் உங்களை நோக்கி வந்துகொண்டிருக்கிறார்.",
+    },
+    "informational": {
+        "en": "Choose what you need and I will show you the way.",
+        "es": "Elige lo que necesitas y te mostraré el camino.",
+        "fr": "Choisissez ce dont vous avez besoin et je vous montrerai le chemin.",
+        "hi": "जो चाहिए वह चुनें, मैं आपको रास्ता दिखाऊँगा।",
+        "mr": "तुम्हाला काय हवे ते निवडा, मी तुम्हाला मार्ग दाखवतो.",
+        "ta": "உங்களுக்கு என்ன வேண்டும் என்பதைத் தேர்ந்தெடுங்கள், நான் வழி காட்டுகிறேன்.",
+    },
+}
+
+
+def _localise_concierge_reply(payload: Mapping[str, Any], language: str) -> str:
+    """Localise a deterministic concierge acknowledgement from the controlled
+    catalogue, leaving a real model's free-text reply untouched.
+
+    Safety-critical replies are always taken from the catalogue (policy: the model
+    does not speak for safety). Informational replies are localised only when they
+    are the canned fallback/transcript string; anything else came from the model,
+    which produced it in the fan's language already.
+    """
+    tier = payload.get("safety_tier")
+    table = _CONCIERGE_ACK.get(tier or "")
+    if table is None:
+        return payload.get("reply_text", "")
+    if tier == "safety_critical" or payload.get("reply_text") == table["en"]:
+        return table.get(language, table["en"])
+    return payload.get("reply_text", "")
+
+
 def concierge(
     utterance: str,
     language: str,
@@ -590,8 +635,13 @@ def concierge(
         except NoRouteError as exc:
             error = str(exc)
 
+    # Localise the acknowledgement for presentation only. result_json copies the
+    # payload, so the audited record keeps the canonical decision untouched.
+    res = result_json(result)
+    res["payload"]["reply_text"] = _localise_concierge_reply(payload, language)
+
     return {
-        "result": result_json(result),
+        "result": res,
         "route": route,
         "route_error": error,
         "audit": orch.audit.to_json(),

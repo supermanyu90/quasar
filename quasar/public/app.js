@@ -23,6 +23,7 @@ const state = {
   yaw: 0.62,       // 3D rotation, radians
   stepFreeOnly: false,
   lastAmenity: null,  // the attendee's last lookup, so changing language re-runs it
+  lastAsk: null,      // the attendee's last concierge question, for the same reason
 };
 
 const $ = (id) => document.getElementById(id);
@@ -531,6 +532,7 @@ function renderExecution(x) {
 /* ── fan ─────────────────────────────────────────────────────────── */
 
 async function askConcierge(utterance) {
+  state.lastAsk = utterance;
   const out = $('fan-result');
   out.innerHTML = '<p class="spin">Asking…</p>';
   try {
@@ -575,6 +577,20 @@ async function askConcierge(utterance) {
     out.innerHTML = '';
     out.appendChild(el('div', 'reason', e.message));
   }
+}
+
+function rerunConcierge() {
+  if (!state.lastAsk) return;
+  const cheap = mode() === 'recorded' || mode() === 'partition';
+  if (cheap) { askConcierge(state.lastAsk); return; }
+  // Live/edge: don't spend an inference call on a language change the fan can
+  // confirm. Leave the existing reply and drop a one-line prompt above it.
+  const out = $('fan-result');
+  const prior = out.querySelector('.lang-hint');
+  if (prior) prior.remove();
+  if (!out.childElementCount) return;   // nothing asked yet on screen
+  out.prepend(el('div', 'lang-hint',
+    `Language set to ${$('fan-lang').value}. Press Ask to answer again in it.`));
 }
 
 /* ── pre-match ───────────────────────────────────────────────────── */
@@ -743,7 +759,7 @@ async function runReadiness() {
 async function loadVenue(venueId) {
   state.venueId = venueId;
   state.routes = {}; state.cordoned.clear(); state.plan = null; state.brief = null;
-  state.audit = []; state.lastAmenity = null;
+  state.audit = []; state.lastAmenity = null; state.lastAsk = null;
 
   const [venue, s] = await Promise.all([api('venue'), api('state')]);
   state.venue = venue;
@@ -935,6 +951,11 @@ async function boot() {
   for (const id of ['fan-lang', 'fan-node', 'fan-seat', 'fan-accessible', 'fan-calm']) {
     $(id).addEventListener('change', rerunWayfind);
   }
+  // The wayfinder is deterministic and free to re-run; the concierge is a model
+  // path, so it re-answers automatically only on a language change and only when
+  // inference costs nothing (recorded transcripts or the deterministic partition).
+  // In live/edge, a re-answer is a real call, so we prompt rather than spend it.
+  $('fan-lang').addEventListener('change', rerunConcierge);
   $('stress-run').onclick = runStress;
   $('verify').onclick = verifyChain;
   $('tamper-audit').onclick = tamperAudit;

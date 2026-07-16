@@ -141,5 +141,50 @@ class TestWayfinding(unittest.TestCase):
             self.assertNotIn(cordon[0], r["route"]["edges"])
 
 
+class TestConciergeLanguage(unittest.TestCase):
+    """The concierge acknowledgement must reach the fan in their language even with
+    no model reachable — from a controlled, human-authored catalogue, not a machine
+    translation, and never at the cost of a real model's own localised reply."""
+
+    def _ask(self, utterance: str, language: str, mode: str = "recorded") -> dict:
+        plane = web.resolve_model(mode, None, VENUE)
+        return web.concierge(utterance, language, start_node(), False, VENUE, plane)
+
+    def _reply(self, *args, **kw) -> str:
+        return self._ask(*args, **kw)["result"]["payload"]["reply_text"]
+
+    def test_informational_reply_localises_without_a_model(self) -> None:
+        en = self._reply("where is the nearest restroom?", "en")
+        es = self._reply("where is the nearest restroom?", "es")
+        self.assertNotEqual(en, es)
+        self.assertIn("camino", es.lower())
+
+    def test_safety_critical_reply_comes_from_the_catalogue_localised(self) -> None:
+        p = self._ask("a man has collapsed and is not breathing", "mr")["result"]["payload"]
+        self.assertEqual(p["safety_tier"], "safety_critical")
+        self.assertEqual(p["reply_text"], web._CONCIERGE_ACK["safety_critical"]["mr"])
+
+    def test_an_unsupported_language_falls_back_to_english(self) -> None:
+        self.assertEqual(
+            self._reply("where is the nearest restroom?", "de"),
+            web._CONCIERGE_ACK["informational"]["en"],
+        )
+
+    def test_a_real_model_free_text_reply_is_left_untouched(self) -> None:
+        """Only the canned deterministic strings are swapped; a genuine model reply
+        (never one of those strings) is kept in whatever language the model wrote."""
+        payload = {"safety_tier": "informational",
+                   "reply_text": "Sure — the restrooms are just past gate 4."}
+        self.assertEqual(
+            web._localise_concierge_reply(payload, "es"),
+            "Sure — the restrooms are just past gate 4.",
+        )
+
+    def test_every_language_has_both_acknowledgements(self) -> None:
+        langs = set(web._WORDING)
+        for tier, table in web._CONCIERGE_ACK.items():
+            self.assertEqual(set(table), langs, f"{tier} is missing a language")
+
+
 if __name__ == "__main__":
     unittest.main()

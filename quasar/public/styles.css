@@ -516,3 +516,11 @@ footer { padding: 1.6rem 2rem 3rem; color: var(--dim); font-size: .86rem; max-wi
 .wayfind-card .info { margin-top: .5rem; font-size: .82rem; color: var(--dim); }
 .wayfind-card .steps { margin-top: .55rem; font-size: .78rem; color: var(--dim); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
 .wayfind-card.miss { border-left-color: var(--warn); }
+
+.lang-hint {
+  margin-bottom: .6rem; padding: .5rem .7rem; border-radius: 12px;
+  font-size: .82rem; font-weight: 600; color: var(--text);
+  background: color-mix(in srgb, var(--accent) 12%, var(--panel-2));
+  border: 1px dashed color-mix(in srgb, var(--accent) 40%, var(--line));
+  animation: pop .26s var(--spring) both;
+}
