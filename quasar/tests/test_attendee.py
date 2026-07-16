@@ -83,6 +83,45 @@ class TestWayfinding(unittest.TestCase):
         hi = web.wayfind(VENUE, from_node=start_node(), amenity_key="food", language="hi")
         self.assertIn("मार्ग", hi["message"])
 
+    def test_the_whole_card_switches_language_not_just_the_greeting(self) -> None:
+        """The regression this guards: switching language used to change only the
+        lead-in phrase. Now the message AND the secondary notes are localised."""
+        en = web.wayfind(VENUE, from_node=start_node(), amenity_key="food",
+                         language="en", accessible=True)
+        es = web.wayfind(VENUE, from_node=start_node(), amenity_key="food",
+                         language="es", accessible=True)
+        self.assertIsNotNone(es["route"])
+        self.assertNotEqual(en["message"], es["message"])
+        # the step-free qualifier is localised, not left in English
+        self.assertIn("sin escalones", es["message"])
+        self.assertNotIn("step-free", es["message"])
+        # the secondary "worst crowding" note is localised too
+        self.assertIn("servicio", " ".join(es["notes"]).lower())
+        self.assertIn("level of service", " ".join(en["notes"]).lower())
+
+    def test_numbers_and_place_names_survive_the_language_switch(self) -> None:
+        """Entity preservation: the distance (a number) and the destination name
+        (signage) appear verbatim in a non-English reply — never translated."""
+        es = web.wayfind(VENUE, from_node=start_node(), amenity_key="food", language="es")
+        self.assertTrue(any(ch.isdigit() for ch in es["message"]))
+        self.assertIn(es["destination"]["name"], es["message"])
+
+    def test_an_unsupported_language_falls_back_to_english_not_machine_translation(self) -> None:
+        de = web.wayfind(VENUE, from_node=start_node(), amenity_key="food", language="de")
+        en = web.wayfind(VENUE, from_node=start_node(), amenity_key="food", language="en")
+        self.assertEqual(de["message"], en["message"])
+
+    def test_every_language_has_complete_authored_phrasing(self) -> None:
+        """No half-translated card: every field formats for every shipped language,
+        with all placeholders resolved (a typo'd placeholder would leave a brace)."""
+        sample = dict(dest="Gate 4", m=240, mins=3, tail=" (x)",
+                      los="D", n=2, amenity="restroom", sfp="", loc="Gate 1")
+        for lang, w in web._WORDING.items():
+            for field in ("route", "worst", "more", "none_mapped", "no_route", "assist"):
+                text = getattr(w, field).format(**sample)
+                self.assertTrue(text.strip(), f"{lang}.{field} empty")
+                self.assertNotIn("{", text, f"{lang}.{field} unresolved placeholder")
+
     def test_an_unknown_amenity_is_rejected(self) -> None:
         with self.assertRaises(ValueError):
             web.wayfind(VENUE, from_node=start_node(), amenity_key="teleporter")

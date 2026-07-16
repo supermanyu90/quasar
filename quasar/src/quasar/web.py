@@ -602,17 +602,107 @@ def concierge(
 # Attendee companion — deterministic wayfinding to amenities
 # ==========================================================================
 
-# A short lead-in per language, so a button result greets the fan in their own
-# tongue. The amenity names stay as signage reads; the numbers are universal. The
-# free-text concierge (the model path) still handles anything richer.
-_LEAD: Mapping[str, str] = {
-    "en": "Here’s your route to",
-    "es": "Aquí tienes tu ruta a",
-    "fr": "Voici votre itinéraire vers",
-    "hi": "यहाँ आपका मार्ग है:",
-    "mr": "हा तुमचा मार्ग आहे:",
-    "ta": "இதோ உங்கள் வழி:",
+@dataclass(frozen=True, slots=True)
+class _Wording:
+    """Controlled, human-authored wayfinding phrasing for one language.
+
+    This is the Tier-2 *informational* path — not the safety-critical announcement
+    catalogue — but it obeys the same two rules the catalogue does: the strings are
+    authored, never machine-translated at request time, and the entities that must
+    survive a language switch are interpolated, never translated — amenity and
+    destination NAMES (as the signage reads) and NUMBERS. A whole result card can
+    therefore switch language without a single number or place name being at risk.
+
+    Placeholders, by field: ``route`` uses {dest} {m} {mins} {tail}; ``worst`` uses
+    {los}; ``more`` uses {n}; ``none_mapped`` and ``no_route`` use {amenity};
+    ``no_route`` also uses {sfp}; ``assist`` uses {loc}.
+    """
+
+    route: str
+    step_free: str          # qualifier word, e.g. "step-free"
+    calm: str               # qualifier word, e.g. "calm"
+    worst: str              # "Worst crowding on the way: level of service {los}."
+    more: str               # "+{n} more of these nearby."
+    none_mapped: str
+    no_route: str
+    step_free_required: str  # the {sfp} clause, or "" when not step-free
+    assist: str
+
+
+# The six languages this deployment ships human-authored phrasing for. Any language
+# outside this table falls back to English rather than being machine-translated.
+_WORDING: Mapping[str, _Wording] = {
+    "en": _Wording(
+        route="Here’s your route to {dest} — {m} m, about {mins} min{tail}.",
+        step_free="step-free", calm="calm",
+        worst="Worst crowding on the way: level of service {los}.",
+        more="+{n} more of these nearby.",
+        none_mapped="No {amenity} is mapped at this venue yet.",
+        no_route="No route to a {amenity} is open from here right now{sfp}. "
+                 "Ask the nearest steward for help.",
+        step_free_required=" (a step-free route was required)",
+        assist="Assistance is on its way to you at {loc}. A steward has been notified.",
+    ),
+    "es": _Wording(
+        route="Aquí tienes tu ruta a {dest}: {m} m, unos {mins} min{tail}.",
+        step_free="sin escalones", calm="tranquila",
+        worst="Mayor aglomeración en el camino: nivel de servicio {los}.",
+        more="+{n} más cerca de aquí.",
+        none_mapped="Todavía no hay ningún {amenity} señalizado en este recinto.",
+        no_route="Ahora mismo no hay ninguna ruta abierta a un {amenity} desde "
+                 "aquí{sfp}. Pide ayuda al acomodador más cercano.",
+        step_free_required=" (se requería una ruta sin escalones)",
+        assist="La asistencia va en camino hacia ti en {loc}. Se ha avisado a un acomodador.",
+    ),
+    "fr": _Wording(
+        route="Voici votre itinéraire vers {dest} : {m} m, environ {mins} min{tail}.",
+        step_free="sans marches", calm="calme",
+        worst="Plus forte affluence en chemin : niveau de service {los}.",
+        more="+{n} autres à proximité.",
+        none_mapped="Aucun {amenity} n’est encore répertorié dans cette enceinte.",
+        no_route="Aucun itinéraire vers un {amenity} n’est ouvert d’ici pour le "
+                 "moment{sfp}. Demandez de l’aide au steward le plus proche.",
+        step_free_required=" (un itinéraire sans marches était requis)",
+        assist="De l’aide arrive vers vous à {loc}. Un steward a été prévenu.",
+    ),
+    "hi": _Wording(
+        route="{dest} तक आपका मार्ग — {m} मीटर, लगभग {mins} मिनट{tail}।",
+        step_free="बिना सीढ़ी", calm="शांत",
+        worst="रास्ते में सबसे अधिक भीड़: सेवा स्तर {los}।",
+        more="+{n} और पास में हैं।",
+        none_mapped="इस स्थल पर अभी कोई {amenity} मानचित्र पर नहीं है।",
+        no_route="अभी यहाँ से किसी {amenity} तक कोई मार्ग खुला नहीं है{sfp}। "
+                 "कृपया निकटतम कर्मचारी से सहायता लें।",
+        step_free_required=" (बिना सीढ़ी वाला मार्ग आवश्यक था)",
+        assist="{loc} पर आपके पास सहायता आ रही है। एक कर्मचारी को सूचित कर दिया गया है।",
+    ),
+    "mr": _Wording(
+        route="{dest} पर्यंत तुमचा मार्ग — {m} मीटर, अंदाजे {mins} मिनिटे{tail}.",
+        step_free="पायऱ्यांशिवाय", calm="शांत",
+        worst="वाटेत सर्वाधिक गर्दी: सेवा स्तर {los}.",
+        more="+{n} आणखी जवळपास आहेत.",
+        none_mapped="या ठिकाणी अजून कोणतेही {amenity} नकाशावर नाही.",
+        no_route="सध्या इथून कोणत्याही {amenity} पर्यंत मार्ग उपलब्ध नाही{sfp}. "
+                 "कृपया जवळच्या कर्मचाऱ्याला विचारा.",
+        step_free_required=" (पायऱ्यांशिवाय मार्ग आवश्यक होता)",
+        assist="{loc} येथे तुमच्यापर्यंत मदत येत आहे. कर्मचाऱ्याला कळवले आहे.",
+    ),
+    "ta": _Wording(
+        route="{dest} செல்லும் வழி — {m} மீ, சுமார் {mins} நிமிடம்{tail}.",
+        step_free="படிக்கட்டு இல்லாத", calm="அமைதியான",
+        worst="வழியில் அதிக கூட்டம்: சேவை நிலை {los}.",
+        more="+{n} அருகில் உள்ளன.",
+        none_mapped="இந்த அரங்கில் இன்னும் {amenity} வரைபடத்தில் இல்லை.",
+        no_route="இப்போது இங்கிருந்து {amenity} செல்ல வழி எதுவும் திறந்து இல்லை{sfp}. "
+                 "அருகிலுள்ள ஊழியரிடம் உதவி கேளுங்கள்.",
+        step_free_required=" (படிக்கட்டு இல்லாத வழி தேவைப்பட்டது)",
+        assist="{loc} இல் உங்களை நோக்கி உதவி வந்துகொண்டிருக்கிறது. ஊழியருக்கு அறிவிக்கப்பட்டது.",
+    ),
 }
+
+
+def _words(language: str) -> _Wording:
+    return _WORDING.get(language, _WORDING["en"])
 
 
 def _fan_profile(accessible: bool, calm: bool) -> Profile:
@@ -677,17 +767,15 @@ def wayfind(
     if from_node not in p.venue.nodes:
         raise ValueError(f"unknown location {from_node!r}")
 
-    base = {"amenity": am.key, "icon": am.icon, "label": am.label}
+    base = {"amenity": am.key, "icon": am.icon, "label": am.label, "language": language}
+    w = _words(language)
 
     if am.kind == "assist":
         # A request, not a destination. Acknowledge honestly; in a real deployment
         # this notifies stewarding rather than routing to a fixed point.
         return {
-            **base, "request": True, "route": None, "destination": None,
-            "message": (
-                f"Assistance is on its way to you at {p.venue.node(from_node).name}. "
-                "A steward has been notified."
-            ),
+            **base, "request": True, "route": None, "destination": None, "notes": [],
+            "message": w.assist.format(loc=p.venue.node(from_node).name),
         }
 
     if am.kind == "seat":
@@ -697,8 +785,8 @@ def wayfind(
 
     if not candidates:
         return {
-            **base, "found": False, "route": None, "destination": None,
-            "message": f"No {am.label.lower()} is mapped at this venue yet.",
+            **base, "found": False, "route": None, "destination": None, "notes": [],
+            "message": w.none_mapped.format(amenity=am.label.lower()),
         }
 
     prof = _fan_profile(accessible, calm)
@@ -718,32 +806,37 @@ def wayfind(
         # Every candidate exists but none is reachable under the fan's constraints
         # (e.g. an accessible route is demanded and only stepped ones exist). The
         # router refuses rather than sending them somewhere unsafe.
-        why = "step-free " if accessible else ""
+        sfp = w.step_free_required if accessible else ""
         return {
-            **base, "found": True, "route": None, "destination": None,
-            "message": (
-                f"No {why}route to a {am.label.lower()} is open from here right now. "
-                "Ask the nearest steward for help."
-            ),
+            **base, "found": True, "route": None, "destination": None, "notes": [],
+            "message": w.no_route.format(amenity=am.label.lower(), sfp=sfp),
         }
 
     dest = p.venue.node(best.destination)
-    lead = _LEAD.get(language, _LEAD["en"])
-    extras = []
-    if accessible:
-        extras.append("step-free")
+    rj = route_json(best)
+    extras = [w.step_free] if accessible else []
     if calm:
-        extras.append("calm")
+        extras.append(w.calm)
     tail = f" ({', '.join(extras)})" if extras else ""
+
+    # Secondary lines, pre-localised so the whole card switches language, not just
+    # the greeting. The LOS letter and the count are universal; the words are not.
+    notes = [w.worst.format(los=rj["worst_los"])]
+    if reachable > 1:
+        notes.append(w.more.format(n=reachable - 1))
+
     return {
         **base,
         "found": True,
-        "route": route_json(best),
+        "route": rj,
         "destination": {"id": dest.id, "name": dest.name, "info": dest.info, "zone": dest.zone},
         "alternatives": max(0, reachable - 1),
-        "message": (
-            f"{lead} {dest.name} — {round(best.distance_m)} m, about "
-            f"{max(1, round(best.eta_s / 60))} min{tail}."
+        "notes": notes,
+        "message": w.route.format(
+            dest=dest.name,
+            m=round(best.distance_m),
+            mins=max(1, round(best.eta_s / 60)),
+            tail=tail,
         ),
     }
 

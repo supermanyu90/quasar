@@ -22,6 +22,7 @@ const state = {
   view: '2d',      // '2d' | '3d'
   yaw: 0.62,       // 3D rotation, radians
   stepFreeOnly: false,
+  lastAmenity: null,  // the attendee's last lookup, so changing language re-runs it
 };
 
 const $ = (id) => document.getElementById(id);
@@ -672,6 +673,7 @@ async function loadAmenities() {
 }
 
 async function wayfindTo(key) {
+  state.lastAmenity = key;
   const out = $('wayfind-result');
   out.innerHTML = '<p class="spin">Finding you the best way…</p>';
   try {
@@ -694,13 +696,12 @@ async function wayfindTo(key) {
     const big = el('div', 'big');
     big.append(el('span', 'ico', d.icon), el('span', null, d.destination ? d.destination.name : d.label));
     card.appendChild(big);
+    // The message and the notes are already in the fan's language; the step list is
+    // node ids, which are universal. Nothing here is composed in English on the client.
     card.appendChild(el('div', 'msg', d.message));
     if (d.destination && d.destination.info) card.appendChild(el('div', 'info', d.destination.info));
-    if (d.route) {
-      card.appendChild(el('div', 'info', `Worst crowding on the way: level of service ${d.route.worst_los}.`));
-      card.appendChild(el('div', 'steps', d.route.nodes.join(' → ')));
-      if (d.alternatives) card.appendChild(el('div', 'info', `+${d.alternatives} more of these nearby.`));
-    }
+    if (d.route) card.appendChild(el('div', 'steps', d.route.nodes.join(' → ')));
+    for (const note of d.notes || []) card.appendChild(el('div', 'info', note));
     out.appendChild(card);
   } catch (e) {
     out.innerHTML = '';
@@ -742,7 +743,7 @@ async function runReadiness() {
 async function loadVenue(venueId) {
   state.venueId = venueId;
   state.routes = {}; state.cordoned.clear(); state.plan = null; state.brief = null;
-  state.audit = [];
+  state.audit = []; state.lastAmenity = null;
 
   const [venue, s] = await Promise.all([api('venue'), api('state')]);
   state.venue = venue;
@@ -926,6 +927,14 @@ async function boot() {
   $('tamper-plan').onclick = tamperPlan;
   $('fan-ask').onclick = () => askConcierge($('fan-text').value);
   $('fan-emergency').onclick = () => askConcierge('मदत! एक माणूस पडला आहे, he has collapsed');
+
+  // Changing the language (or any routing constraint) re-runs the last amenity
+  // lookup so the result switches immediately, rather than waiting for the next
+  // tap. Wired once here; the controls persist across venue loads.
+  const rerunWayfind = () => { if (state.lastAmenity) wayfindTo(state.lastAmenity); };
+  for (const id of ['fan-lang', 'fan-node', 'fan-seat', 'fan-accessible', 'fan-calm']) {
+    $(id).addEventListener('change', rerunWayfind);
+  }
   $('stress-run').onclick = runStress;
   $('verify').onclick = verifyChain;
   $('tamper-audit').onclick = tamperAudit;
