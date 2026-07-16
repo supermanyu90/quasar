@@ -25,6 +25,10 @@ GenAI is **load-bearing** — the intake, synthesis, language and long-tail
 situations are irreducibly linguistic — and it is **safe** because it never
 computes a route, a capacity, or an evacuation time.
 
+![The Quasar console, opening on the Guide tab: the venue map on the left with
+level-of-service-coloured corridors and a live incident, the problem-statement
+alignment on the right.](docs/console-guide.png)
+
 ## Where to start
 
 | If you want… | Read |
@@ -43,6 +47,12 @@ watch it hold. The other tabs:
   agents' proposal with its corroboration score, then the human-in-the-loop
   barrier you can try to defeat, then actuation with routes recomputed from the
   graph.
+
+  ![The control room: the deterministic plane's corridor and gate tables — a
+  crushing LOS-F corridor, a gate breaching its 0.90 trigger, and a procedural
+  P0 severity floor — beside the venue map with the medic route and cordon drawn
+  on it.](docs/console-control-room.png)
+
 - **🎟️ Attendee** — tap what you need (food, restroom, seat, quiet room) and get a
   crowd-aware, step-free, calm route drawn on the map, with the reply in your
   language; or ask the concierge in your own words.
