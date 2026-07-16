@@ -1,7 +1,0 @@
-# The deterministic plane, the governance barrier, the schema validator, the
-# BM25 retriever and the whole test suite require NOTHING from this file.
-# They run on a stock Python 3.11+ interpreter, offline, on a venue box that has
-# never seen the internet. That is a safety property, not a packaging preference.
-#
-# This dependency is needed only to talk to a real cloud model:
-anthropic>=0.40.0
