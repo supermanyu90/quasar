@@ -106,7 +106,7 @@ def language_readiness(profile: VenueProfile) -> list[Check]:
             )
         )
 
-    if unsupported := [l for l in spoken if l not in SUPPORTED_LANGUAGES]:
+    if unsupported := [lang for lang in spoken if lang not in SUPPORTED_LANGUAGES]:
         checks.append(
             Check(
                 id="lang.unsupported",

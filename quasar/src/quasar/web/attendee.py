@@ -262,7 +262,7 @@ def amenities_json(venue_id: str) -> dict[str, Any]:
         })
     return {
         "venue": venue_id,
-        "groups": [{"key": k, "label": l} for k, l in GROUPS],
+        "groups": [{"key": k, "label": label} for k, label in GROUPS],
         "amenities": items,
     }
 
