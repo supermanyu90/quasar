@@ -27,14 +27,13 @@ both go through the schema.
 
 from __future__ import annotations
 
-import json
 import random
 from dataclasses import dataclass
 from typing import Any, Iterator, Mapping, Sequence
 
 from quasar import schemas
 from quasar.crowd import ADVISORY_DENSITY
-from quasar.llm import LanguageModel, ModelRequest, ModelUnavailable, extract_json
+from quasar.llm import LanguageModel, ModelRequest, extract_json
 from quasar.plane import DeterministicPlane
 from quasar.queueing import lanes_required
 from quasar.routing import ACCESSIBLE, FAN, NoRouteError, RouteRequest
