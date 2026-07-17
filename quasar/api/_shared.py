@@ -1,8 +1,14 @@
-"""Request plumbing shared by the Vercel functions.
+"""Request plumbing shared by the API.
 
-Underscore-prefixed, so Vercel treats it as a library rather than routing it as an
-endpoint. It contains no venue logic — everything of substance lives in
-``quasar.web`` so it is testable without a web server.
+The one HTTP concern in the project. :class:`Endpoint` is the base handler; the
+sibling modules add only a ``run(self, payload) -> dict`` each, and ``index.py``
+(the single Vercel entrypoint, mirrored by ``tools/serve.py``) wraps them. It holds
+no venue logic — everything of substance lives in ``quasar.web`` so it is testable
+without a web server.
+
+Importing this module is what puts ``src/`` on the path, so it must be imported
+before any ``quasar.*`` import. Its own siblings are imported by ``index.py`` /
+``serve.py``, which put ``api/`` on the path first.
 """
 
 from __future__ import annotations
@@ -12,7 +18,7 @@ import os
 import sys
 import time
 from http.server import BaseHTTPRequestHandler
-from typing import Any, Callable
+from typing import Any
 
 # The package lives in src/ and the functions in api/. Vercel bundles src/** via
 # the `includeFiles` rule in vercel.json; this makes it importable.
@@ -125,8 +131,3 @@ class Endpoint(BaseHTTPRequestHandler):
 
         q = parse_qs(urlparse(self.path).query)
         return (q.get("venue") or [None])[0]
-
-
-def endpoint(run: Callable[[Endpoint, dict[str, Any]], dict[str, Any]]) -> type[Endpoint]:
-    """Build a Vercel `handler` class from a single function."""
-    return type("handler", (Endpoint,), {"run": run})

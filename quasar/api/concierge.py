@@ -8,17 +8,9 @@ walk through.
 
 from __future__ import annotations
 
-import os
-import sys
-
-# Vercel imports this file directly; api/ is not guaranteed to be on sys.path, so
-# put it there before reaching for the shared plumbing (which in turn puts src/ on
-# the path so the quasar package is importable).
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-
 from typing import Any
 
-from _shared import Endpoint, endpoint, live_budget_ok
+from _shared import Endpoint, live_budget_ok
 from quasar.web import LiveDenied, concierge, resolve_model
 
 
@@ -38,6 +30,3 @@ def run(self: Endpoint, payload: dict[str, Any]) -> dict[str, Any]:
         seat=payload.get("seat"),
         cordoned=payload.get("cordoned") or (),
     )
-
-
-handler = endpoint(run)

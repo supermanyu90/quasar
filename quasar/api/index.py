@@ -1,17 +1,16 @@
-"""Single Vercel entrypoint for every /api/* route.
+"""The single API entrypoint: one handler that dispatches every /api/* route.
 
 Modern Vercel builds one *named* Python entrypoint per project (``index.py`` /
 ``app.py`` / ...), not every file in ``api/`` the way the older runtime did. This
-module is that entrypoint. It does not reimplement anything: it reuses the exact
-per-endpoint ``run()`` functions that the local dev server (``tools/serve.py``)
-routes to file-by-file, so there is a single implementation of each endpoint,
-exercised identically in both places.
+module is that entrypoint, and ``tools/serve.py`` drives the very same handler
+locally, so there is exactly one dispatch path. It reimplements nothing: each
+sibling module contributes a ``run(self, payload) -> dict``; this file only chooses
+which ``run`` to call, reusing :class:`_shared.Endpoint`'s HTTP plumbing (body
+parsing, CORS, the refusal-to-status map) unchanged.
 
-Routing: ``vercel.json`` rewrites ``/api/<name>`` to ``/api/index?endpoint=<name>``
-and merges the original query string, so the endpoint name and ``?venue=...`` arrive
-together as query parameters. Dispatch reuses :class:`_shared.Endpoint`'s HTTP
-plumbing (body parsing, CORS, the refusal-to-status map) unchanged -- this module
-only chooses which ``run`` to call.
+Routing: ``vercel.json`` rewrites ``/api/<name>`` to ``/api?endpoint=<name>`` and
+merges the original query string, so the endpoint name and ``?venue=...`` arrive
+together as query parameters.
 """
 
 from __future__ import annotations

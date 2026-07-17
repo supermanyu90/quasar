@@ -7,17 +7,9 @@ exceed the function limit on a live run.
 
 from __future__ import annotations
 
-import os
-import sys
-
-# Vercel imports this file directly; api/ is not guaranteed to be on sys.path, so
-# put it there before reaching for the shared plumbing (which in turn puts src/ on
-# the path so the quasar package is importable).
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-
 from typing import Any
 
-from _shared import Endpoint, endpoint, live_budget_ok
+from _shared import Endpoint, live_budget_ok
 from quasar.web import LiveDenied, resolve_model, run_agent
 
 
@@ -34,6 +26,3 @@ def run(self: Endpoint, payload: dict[str, Any]) -> dict[str, Any]:
         name, venue, plane, brief=payload.get("brief"), audit_chain=payload.get("audit")
     )
     return {"result": result, "audit": audit.to_json(), "mode": plane.mode, "note": plane.note}
-
-
-handler = endpoint(run)
